@@ -1,0 +1,8 @@
+name = "import"
+author = "David Minnerly"
+content_root = "src"
+version = "0.1.0"
+
+[dependencies]
+t = { git = "https://github.com/Roblox/t", rev = "master" }
+Cryo = { git = "https://github.com/Roblox/cryo", rev = "roblox" }
