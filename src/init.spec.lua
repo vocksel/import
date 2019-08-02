@@ -1,13 +1,11 @@
 return function()
 	local import = require(script.Parent)
 
-	FOCUS()
-
 	it("should be callable", function()
 		expect(type(import)).to.equal("table")
 
-		import("./bind")
 		expect(function()
+			import("./bind")
 		end).to.never.throw()
 	end)
 end
