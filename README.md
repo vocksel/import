@@ -25,6 +25,9 @@ local import = require(game.ReplicatedStorage.Import)
 -- local module = require(script.Parent.Module)
 local module = import("./Module")
 
+-- local module = require(script.Parent.Folder.Module)
+local module = import("./Folder/Module")
+
 -- local module = require(script.Parent.Parent.Module)
 local module = import("../Module")
 
