@@ -8,4 +8,10 @@ return function()
 			import("./bind")
 		end).to.never.throw()
 	end)
+
+	it("should not error when calling setConfig", function()
+		expect(function()
+			import.setConfig({})
+		end).to.never.throw()
+	end)
 end
