@@ -6,6 +6,17 @@ Having to constantly type `script.Parent` with varying levels of `.Parent` is te
 
 This module aims to fix that by providing a concise syntax for writing import paths that closely resembles what's used on the filesystem, as well as taking inspiration from the `import { foo } from "module"` syntax from JavaScript.
 
+## Installation
+
+**Model File (Roblox Studio)**
+- Download the `rbxm` model file attached to the latest release from the [GitHub releases page](https://github.com/vocksel/import/releases).
+- Insert the model into Studio into a place like `ReplicatedStorage`
+
+**Filesystem**
+- Copy the `src` directory into your codebase
+- Rename the folder to `import`
+- Use a plugin like [Rojo](https://github.com/LPGhatguy/rojo) to sync the files into a place
+
 ## Usage
 
 ```lua
