@@ -5,7 +5,7 @@ return function()
 		expect(type(import)).to.equal("table")
 
 		expect(function()
-			import("./bind")
+			import("./mocks/tableModule")
 		end).to.never.throw()
 	end)
 
