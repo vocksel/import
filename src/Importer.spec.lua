@@ -114,6 +114,25 @@ return function()
 			expect(module.foo).to.equal("foo")
 		end)
 
+		it("should import a module down one level down (script.Parent:FindFirstChild())", function()
+			local mockScript = Instance.new("Script")
+			local mockModule = MOCK_TABLE_MODULE:Clone()
+
+			local mockDataModel = newFolder({
+				Script = mockScript,
+				ReplicatedStorage = newFolder({
+					Module = mockModule,
+				})
+			})
+
+			local importer = Importer.new(mockDataModel)
+
+			local module = importer:import(mockScript, "./ReplicatedStorage/Module")
+
+			expect(type(module)).to.equal("table")
+			expect(module.foo).to.equal("foo")
+		end)
+
 		-- This is something that we may want to implement later but currently
 		-- is not something that oculd be seen as actively used when we have
 		-- aliases.
