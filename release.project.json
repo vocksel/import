@@ -1,0 +1,6 @@
+{
+  "name": "import",
+  "tree": {
+    "$path": "src"
+  }
+}
