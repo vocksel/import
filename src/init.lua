@@ -11,6 +11,6 @@ local module = {
 return setmetatable(module, {
 	__call = function(_, path, exports)
 		local caller = getfenv(2).script
-		importer:import(caller, path, exports)
+		return importer:import(caller, path, exports)
 	end
 })
