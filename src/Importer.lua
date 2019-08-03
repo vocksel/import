@@ -29,6 +29,16 @@ local function getExports(module, exports)
 	return unpack(tuple)
 end
 
+--[[
+	FindService and GetService both throw with invalid service names, so we
+	wrap it in a pcall and pray.
+]]
+local function isService(name)
+	local success = pcall(function()
+		game:FindService(name)
+	end)
+	return success
+end
 
 local Importer = {}
 Importer.__index = Importer
@@ -73,7 +83,7 @@ local getNextInstanceCheck = t.tuple(
 	t.string,
 	t.boolean
 )
-function Importer:getNextInstance(current, pathPart, hasAscendedParents)
+function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 	assert(getNextInstanceCheck(current, pathPart, hasAscendedParents))
 
 	if pathPart == "." then
@@ -90,7 +100,11 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents)
 		if alias then
 			return alias
 		else
-			return current:FindFirstChild(pathPart)
+			if isFirstPart and isService(pathPart) then
+				return game:GetService(pathPart)
+			else
+				return current:FindFirstChild(pathPart)
+			end
 		end
 	end
 end
@@ -107,9 +121,17 @@ function Importer:import(callingScript, path, exports)
 	local parts = path:split("/")
 	local current =  callingScript
 	local hasAscendedParents = false
+	local isFirstPart = true
 
 	for _, pathPart in pairs(parts) do
-		local nextInstance = self:getNextInstance(current, pathPart, hasAscendedParents)
+		local nextInstance = self:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
+
+		if isFirstPart then
+			assert(nextInstance, ("%s is not the name of a service, alias, or child"):format(pathPart))
+		else
+			assert(nextInstance, ("Could not find a child named %s at \"%s.%s\"")
+				:format(pathPart, current:GetFullName(), pathPart))
+		end
 
 		-- This makes sure that `../` will take you up into the parent of the
 		-- script (script.Parent.Parent), but `../../` will only take you up
@@ -118,9 +140,9 @@ function Importer:import(callingScript, path, exports)
 			hasAscendedParents = true
 		end
 
-		assert(nextInstance, ("Could not find \"%s.%s\""):format(current:GetFullName(), pathPart))
 
 		current = nextInstance
+		isFirstPart = false
 	end
 
 	if current:IsA("ModuleScript") then

@@ -47,6 +47,16 @@ local foo = import("./Module", { "foo" })
 local foo, bar = import("./Module", { "foo", "bar" })
 ```
 
+Roblox services can be imported by starting the path with them:
+
+```lua
+-- local module = require(game.ReplicatedStorage.module)
+local module = import("ReplicatedStorage/module")
+
+-- local module = require(game.ServerStorage.module)
+local module = import("ServerStorage/module")
+```
+
 You can set aliases to define starting points for your paths:
 
 ```lua

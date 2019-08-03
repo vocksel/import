@@ -114,7 +114,7 @@ return function()
 			expect(module.foo).to.equal("foo")
 		end)
 
-		it("should import a module down one level down (script.Parent:FindFirstChild())", function()
+		it("should import a module one level down (script.Parent:FindFirstChild())", function()
 			local mockScript = Instance.new("Script")
 			local mockModule = MOCK_TABLE_MODULE:Clone()
 
@@ -159,6 +159,8 @@ return function()
 		-- 	expect(module.foo).to.equal("foo")
 		-- end)
 
+
+
 		it("should have support for aliases", function()
 			local mockScript = Instance.new("Script")
 			local mockModule = MOCK_TABLE_MODULE:Clone()
@@ -185,6 +187,41 @@ return function()
 
 			expect(type(module)).to.equal("table")
 			expect(module.foo).to.equal("foo")
+		end)
+
+
+		describe("roblox services", function()
+			it("should have support for Roblox services", function()
+				local mockScript = Instance.new("Script")
+				local importer = Importer.new()
+
+				expect(importer:import(mockScript, "ReplicatedStorage")).to.equal(game.ReplicatedStorage)
+				expect(importer:import(mockScript, "ServerScriptService")).to.equal(game.ServerScriptService)
+				expect(importer:import(mockScript, "ServerStorage")).to.equal(game.ServerStorage)
+			end)
+
+			it("should import instances inside services", function()
+				-- Since we can't mock a service, we just have to be careful and
+				-- clear up afterwards.
+
+				local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+				local mockScript = Instance.new("Script")
+				local mockModule = MOCK_TABLE_MODULE:Clone()
+				mockModule.Name = "Module"
+				mockModule.Parent = ReplicatedStorage
+
+				local importer = Importer.new()
+
+				local module = importer:import(mockScript, "ReplicatedStorage/Module")
+
+				expect(type(module)).to.equal("table")
+				expect(module.foo).to.equal("foo")
+
+				-- Clean up, otherwise we'll be fill up ReplicatedStorage with
+				-- garbage over time.
+				mockModule:Destroy()
+			end)
 		end)
 
 		describe("importing individual exports", function()
