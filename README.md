@@ -1,10 +1,8 @@
-# import()
+# import("./Module")
 
 This module allows you to write paths for Roblox instances like you do on the filesystem.
 
-Having to constantly type `script.Parent` with varying levels of `.Parent` is tedious and leads to lengthy lines. Getting individual members of a module is also troublesome, as you have to assign each one to a variable after requiring.
-
-This module aims to fix that by providing a concise syntax for writing import paths that closely resembles what's used on the filesystem, as well as taking inspiration from the `import { foo } from "module"` syntax from JavaScript.
+Having to constantly type `script.Parent` with varying levels of `.Parent` is tedious and can produce excessively long lines. This module aims to fix this by providing a concise syntax for writing import paths that closely resembles what's used on the filesystem.
 
 ## Installation
 
@@ -66,7 +64,7 @@ Works for any Roblox instance, so you can use this to import assets as well:
 -- local sound = script.Parent:FindFirstChild("Sound")
 local sound = import("./Sound")
 
--- local sound = script.Parent:FindFirstChild("Part")
+-- local part = script.Parent:FindFirstChild("Part")
 local part = import("./Part")
 ```
 
