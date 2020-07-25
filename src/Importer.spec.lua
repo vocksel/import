@@ -139,7 +139,7 @@ return function()
 			expect(module.foo).to.equal("foo")
 		end)
 
-		it("should import a module one level down (script.Parent:FindFirstChild())", function()
+		it("should import a sibling module (script.Parent:FindFirstChild())", function()
 			local mockScript = Instance.new("Script")
 			local mockModule = MOCK_TABLE_MODULE:Clone()
 
@@ -158,33 +158,54 @@ return function()
 			expect(module.foo).to.equal("foo")
 		end)
 
+		it("should import children of the current script (script:FindFirstChild)", function()
+			local mockScript = Instance.new("Script")
+			local mockModule = MOCK_TABLE_MODULE:Clone()
+
+			local part = Instance.new("Part", mockScript)
+
+			local mockDataModel = newFolder({
+				ServerScriptService = newFolder({
+					Script = mockScript,
+				}),
+				ReplicatedStorage = newFolder({
+					Module = mockModule,
+				})
+			})
+
+			local importer = Importer.new(mockDataModel)
+
+			-- local module = require(game.ReplicatedStorage.Module)
+			local instance = importer:import(mockScript, "/Part")
+
+			expect(instance).to.equal(part)
+		end)
+
 		-- This is something that we may want to implement later but currently
 		-- is not something that oculd be seen as actively used when we have
 		-- aliases.
 
-		-- it("should have support for paths relative to the DataModel", function()
-		-- 	local mockScript = Instance.new("Script")
-		-- 	local mockModule = MOCK_TABLE_MODULE:Clone()
+		it("should have support for paths relative to the DataModel", function()
+			local mockScript = Instance.new("Script")
+			local mockModule = MOCK_TABLE_MODULE:Clone()
 
-		-- 	local mockDataModel = newFolder({
-		-- 		ServerScriptService = newFolder({
-		-- 			Script = mockScript,
-		-- 		}),
-		-- 		ReplicatedStorage = newFolder({
-		-- 			Module = mockModule,
-		-- 		})
-		-- 	})
+			local mockDataModel = newFolder({
+				ServerScriptService = newFolder({
+					Script = mockScript,
+				}),
+				ReplicatedStorage = newFolder({
+					Module = mockModule,
+				})
+			})
 
-		-- 	local importer = Importer.new(mockDataModel)
+			local importer = Importer.new(mockDataModel)
 
-		-- 	-- local module = require(game.ReplicatedStorage.Module)
-		-- 	local module = importer:import(mockScript, "/ReplicatedStorage/Module")
+			-- local module = require(game.ReplicatedStorage.Module)
+			local module = importer:import(mockScript, "ReplicatedStorage/Module")
 
-		-- 	expect(type(module)).to.equal("table")
-		-- 	expect(module.foo).to.equal("foo")
-		-- end)
-
-
+			expect(type(module)).to.equal("table")
+			expect(module.foo).to.equal("foo")
+		end)
 
 		it("should have support for aliases", function()
 			local mockScript = Instance.new("Script")

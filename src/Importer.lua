@@ -99,7 +99,9 @@ local getNextInstanceCheck = t.tuple(
 function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 	assert(getNextInstanceCheck(current, pathPart, hasAscendedParents))
 
-	if pathPart == "." then
+	if pathPart == "" then
+		return current
+	elseif pathPart == "." then
 		return current.Parent
 	elseif pathPart == ".." then
 		if hasAscendedParents then
@@ -120,9 +122,9 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 				return alias
 			elseif isService then
 				return game:GetService(pathPart)
+			else
+				return self:getChild(self.dataModel, pathPart)
 			end
-
-			return self:getChild(current, pathPart)
 		end
 
 		return self:getChild(current, pathPart)
