@@ -233,11 +233,10 @@ return function()
 		end)
 
 		it("should detect require loops and error", function()
-			local mocks = script.Parent.mocks.recursionTest
-			local import = require(mocks.import)
+			local import = require(script.Parent)
 
 			expect(function()
-				local module = import "recursiveModule"
+				local module = import "./recursionTest/recursiveModule"
 			end).to.throw()
 		end)
 
