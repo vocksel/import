@@ -26,16 +26,16 @@ local import = require(game.ReplicatedStorage.Import)
 local module = import "/Module"
 
 -- local module = require(script.Parent.Module)
-local module = import("./Module")
+local module = import "./Module"
 
 -- local module = require(script.Parent.Folder.Module)
-local module = import("./Folder/Module")
+local module = import "./Folder/Module"
 
 -- local module = require(script.Parent.Parent.Module)
-local module = import("../Module")
+local module = import "../Module"
 
 -- local module = require(script.Parent.Parent.Parent.Module)
-local module = import("../../Module")
+local module = import "../../Module"
 ```
 
 If you only care about a few members of a module, you can import them individually:
@@ -54,10 +54,10 @@ Roblox services can be imported by starting the path with them:
 
 ```lua
 -- local module = require(game.ReplicatedStorage.module)
-local module = import("ReplicatedStorage/module")
+local module = import "ReplicatedStorage/module"
 
 -- local module = require(game.ServerStorage.module)
-local module = import("ServerStorage/module")
+local module = import "ServerStorage/module"
 ```
 
 You can set aliases to define starting points for your paths:
@@ -70,7 +70,7 @@ import.setConfig({
 })
 
 -- local module = require(game.ReplicatedStorage.Shared.Module)
-local module = import("shared/Module")
+local module = import "shared/Module"
 ```
 
 You can also configure the module to use WaitForChild, with a configurable timeout
@@ -86,10 +86,10 @@ Works for any Roblox instance, so you can use this to import assets as well:
 
 ```lua
 -- local sound = script.Parent:FindFirstChild("Sound")
-local sound = import("./Sound")
+local sound = import "./Sound"
 
 -- local sound = script.Parent:FindFirstChild("Part")
-local part = import("./Part")
+local part = import "./Part"
 ```
 
 By default, `import` will throw an error when modulescripts attempt to import eachother in a recursive loop (which would otherwise silently fail). This feature was designed with the assumption the user only has a singular script or localscript as the entry point to the codebase, and you can disable it if the feature causes problems.
