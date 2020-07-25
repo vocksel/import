@@ -33,7 +33,7 @@ end
 	FindService and GetService both throw with invalid service names, so we
 	wrap it in a pcall and pray.
 ]]
-local function isService(name)
+local function checkIfIsService(name)
 	local success = pcall(function()
 		game:FindService(name)
 	end)
@@ -95,17 +95,24 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 			return current.Parent.Parent
 		end
 	else
-		local alias = self._config.aliases[pathPart]
+		if isFirstPart then
+			local alias = self._config.aliases[pathPart]
+			local isService = self.dataModel == game and checkIfIsService(pathPart)
 
-		if alias then
-			return alias
-		else
-			if isFirstPart and isService(pathPart) then
+			if alias then
+				if isService then
+					warn("Import: Alias '%s' is also defined as a Roblox service. Using alias instead.")
+				end
+
+				return alias
+			elseif isService then
 				return game:GetService(pathPart)
-			else
-				return current:FindFirstChild(pathPart)
 			end
+
+			return self.dataModel:FindFirstChild(pathPart)
 		end
+
+		return current:FindFirstChild(pathPart)
 	end
 end
 
@@ -119,7 +126,7 @@ function Importer:import(callingScript, path, exports)
 	assert(importCheck(callingScript, path, exports))
 
 	local parts = path:split("/")
-	local current =  callingScript
+	local current = callingScript
 	local hasAscendedParents = false
 	local isFirstPart = true
 
@@ -127,19 +134,18 @@ function Importer:import(callingScript, path, exports)
 		local nextInstance = self:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 
 		if isFirstPart then
-			assert(nextInstance, ("%s is not the name of a service, alias, or child"):format(pathPart))
+			assert(nextInstance, ("Import: '%s' is not the name of a service, alias, or child of current dataModel (%s)")
+				:format(pathPart, self.dataModel))
 		else
-			assert(nextInstance, ("Could not find a child named %s at \"%s.%s\"")
+			assert(nextInstance, ("Could not find a child '%s' at \"%s.%s\"")
 				:format(pathPart, current:GetFullName(), pathPart))
 		end
-
 		-- This makes sure that `../` will take you up into the parent of the
 		-- script (script.Parent.Parent), but `../../` will only take you up
 		-- one extra parent after that.
 		if pathPart == ".." then
 			hasAscendedParents = true
 		end
-
 
 		current = nextInstance
 		isFirstPart = false
