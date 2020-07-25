@@ -19,13 +19,12 @@ local IConfig = t.strictInterface({
 		-- foo.server.lua
 		local foo = getExports(module, { "foo" })
 ]]
-local function getExports(module, exports)
-	local requiredModule = require(module)
+local function getExports(moduleResult, exports,  moduleFullName)
 	local tuple = {}
 
 	for _, name in ipairs(exports) do
-		local export = requiredModule[name]
-		assert(export, ("%s has no export named %s"):format(module:GetFullName(), name))
+		local export = moduleResult[name]
+		assert(export, ("%s has no export named %s"):format(moduleFullName, name))
 		table.insert(tuple, export)
 	end
 
@@ -67,26 +66,59 @@ function Importer.new(dataModel)
     return self
 end
 
-function Importer:setIsCurrentlyRequiring(module, isRequiring)
-	if isRequiring then
-		table.insert(self._currentlyRequiring, module)
-	else
-		for i = #self._currentlyRequiring, 1, -1 do
-			if self._currentlyRequiring[i] == module then
-				table.remove(self._currentlyRequiring, i)
-				break
-			end
-		end
-	end
-end
-
-function Importer:checkIfAlreadyWaitingForRequire(module)
+function Importer:isWaitingForRequire(module)
 	for i, requiringModule in pairs(self._currentlyRequiring) do
 		if requiringModule == module then
 			return true, i
 		end
 	end
 end
+
+function Importer:buildRequireLoopPathString(startIndex, moduleName)
+	local recursionPathStr = moduleName
+	for i = startIndex+1, #self._currentlyRequiring do
+		local module = self._currentlyRequiring[i]
+		recursionPathStr = recursionPathStr .. " - > " .. module.Name
+	end
+	recursionPathStr = recursionPathStr .. " - > " .. moduleName
+
+	return recursionPathStr
+end
+
+function Importer:requireWithLoopDetection(module)
+	local isWaiting, startIndex = self:isWaitingForRequire(module)
+
+	-- If a require for a module hasn't completed when another module tries to
+	-- require it, we know thatit's attempting to require modules in a loop.
+	if isWaiting then
+		local loopPath = Importer:buildRequireLoopPathString(startIndex, module.Name)
+		error(("Require loop! %s"):format(loopPath))
+	end
+
+	-- Add the module we're attempting to require to the list of modules being
+	-- required.
+	table.insert(self._currentlyRequiring, module)
+
+	-- Because requiring a module runs all the code in the module first before
+	-- returning, any import calls that modulevau makes will run before require
+	-- actually returns. Because of this, by adding the module to the list of
+	-- requiring modules, we can build out a chain of dependencies. Once the
+	-- deepest modules are required, the rcursion completes, and all the modules
+	-- return their values, at which point we remove them from the currently
+	-- requiring table.
+	local result = require(module)
+
+	-- Once the module has been required, we can remove it from the list of modules being required.
+	for i = #self._currentlyRequiring, 1, -1 do
+		if self._currentlyRequiring[i] == module then
+			table.remove(self._currentlyRequiring, i)
+			break
+		end
+	end
+
+	return result
+end
+
 
 function Importer:setConfig(newValues)
 	local newConfig = Cryo.Dictionary.join(self._config, newValues)
@@ -192,32 +224,18 @@ function Importer:import(callingScript, path, exports)
 	end
 
 	if current:IsA("ModuleScript") then
-		local module
+		local result
 
 		if self._config.detectRequireLoops then
-			local isRecursivelyRequiring, startIndex = self:checkIfAlreadyWaitingForRequire(current)
-			if isRecursivelyRequiring then
-				local recursionPathStr = current.Name
-				for i = startIndex+1, #self._currentlyRequiring do
-					local module = self._currentlyRequiring[i]
-					recursionPathStr = recursionPathStr .. " - > " .. module.Name
-				end
-				recursionPathStr = recursionPathStr .. " - > " .. current.Name
-
-				error(("Require loop! %s"):format(recursionPathStr))
-			end
-
-			self:setIsCurrentlyRequiring(current, true)
-			module = require(current)
-			self:setIsCurrentlyRequiring(current, false)
+			result = self:requireWithLoopDetection(current)
 		else
-			module = require(current)
+			result = require(current)
 		end
 
 		if exports then
-			return getExports(current, exports)
+			return getExports(result, exports, current:GetFullName())
 		else
-			return module
+			return result
 		end
 	else
 		return current
