@@ -22,6 +22,9 @@ This module aims to fix that by providing a concise syntax for writing import pa
 ```lua
 local import = require(game.ReplicatedStorage.Import)
 
+-- local module = require(script.Module)
+local module = import "/Module"
+
 -- local module = require(script.Parent.Module)
 local module = import("./Module")
 
