@@ -40,6 +40,7 @@ return function()
 				useWaitForChild = true,
 				waitForChildTimeout = 1,
 				detectRequireLoops = false,
+				currentScriptAlias = "asjdhasdj",
 			})
 
 			expect(importer._config).to.never.equal(oldConfig)
@@ -177,7 +178,7 @@ return function()
 			local importer = Importer.new(mockDataModel)
 
 			-- local module = require(game.ReplicatedStorage.Module)
-			local instance = importer:import(mockScript, "/Part")
+			local instance = importer:import(mockScript, "script/Part")
 
 			expect(instance).to.equal(part)
 		end)
@@ -230,6 +231,36 @@ return function()
 
 			expect(type(module)).to.equal("table")
 			expect(module.foo).to.equal("foo")
+		end)
+
+		it("should support changing the current script alias", function()
+			local mockScript = Instance.new("Script")
+			local mockModule = MOCK_TABLE_MODULE:Clone()
+
+			local part = Instance.new("Part", mockScript)
+
+			local mockDataModel = newFolder({
+				ServerScriptService = newFolder({
+					Script = mockScript,
+				}),
+				ReplicatedStorage = newFolder({
+					Module = mockModule,
+				})
+			})
+
+			local importer = Importer.new(mockDataModel)
+
+			importer:setConfig({
+				aliases = {
+					alias = mockDataModel.ReplicatedStorage
+				},
+				currentScriptAlias = "@"
+			})
+
+			-- local module = require(path.to.alias.Module)
+			local part = importer:import(mockScript, "@/Part")
+
+			expect(part).to.equal(part)
 		end)
 
 		it("should detect require loops and error", function()

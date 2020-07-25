@@ -23,7 +23,7 @@ This module aims to fix that by providing a concise syntax for writing import pa
 local import = require(game.ReplicatedStorage.Import)
 
 -- local module = require(script.Module)
-local module = import "/Module"
+local module = import "script/Module"
 
 -- local module = require(script.Parent.Module)
 local module = import "./Module"
@@ -50,13 +50,13 @@ local foo = import("./Module", { "foo" })
 local foo, bar = import("./Module", { "foo", "bar" })
 ```
 
-Roblox services can be imported by starting the path with them:
+If your datamodel is set to game, children of Roblox services can be imported by starting the path with a name of a service:
 
 ```lua
--- local module = require(game.ReplicatedStorage.module)
+-- local module = require(game:GetService("ReplicatedStorage").module)
 local module = import "ReplicatedStorage/module"
 
--- local module = require(game.ServerStorage.module)
+-- local module = require(game:GetService("ServerStorage").module)
 local module = import "ServerStorage/module"
 ```
 
@@ -82,14 +82,15 @@ import.setConfig({
 })
 ```
 
-Works for any Roblox instance, so you can use this to import assets as well:
+You can configure the alias which you use to represent `script` in your paths.
 
 ```lua
--- local sound = script.Parent:FindFirstChild("Sound")
-local sound = import "./Sound"
+import.setConfig({
+	currentScriptAlias = "@"
+})
 
--- local sound = script.Parent:FindFirstChild("Part")
-local part = import "./Part"
+-- local module = require(script.Module)
+local module = import "@/Module"
 ```
 
 By default, `import` will throw an error when modulescripts attempt to import eachother in a recursive loop (which would otherwise silently fail). This feature was designed with the assumption the user only has a singular script or localscript as the entry point to the codebase, and you can disable it if the feature causes problems.

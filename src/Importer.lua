@@ -6,6 +6,7 @@ local IConfig = t.strictInterface({
 	useWaitForChild = t.boolean,
 	waitForChildTimeout = t.number,
 	detectRequireLoops = t.boolean,
+	currentScriptAlias = t.string,
 })
 
 --[[
@@ -57,6 +58,7 @@ function Importer.new(dataModel)
 		useWaitForChild = false,
 		waitForChildTimeout = 1,
 		detectRequireLoops = true,
+		currentScriptAlias = "script",
 	}
 
 	self._currentlyRequiring = {}
@@ -156,7 +158,7 @@ local getNextInstanceCheck = t.tuple(
 function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 	assert(getNextInstanceCheck(current, pathPart, hasAscendedParents))
 
-	if pathPart == "" then
+	if pathPart == self._config.currentScriptAlias then
 		return current
 	elseif pathPart == "." then
 		return current.Parent
