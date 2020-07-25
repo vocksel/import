@@ -60,6 +60,18 @@ local module = import "ReplicatedStorage/module"
 local module = import "ServerStorage/module"
 ```
 
+Works for any Roblox instance, so you can use this to import assets as well:
+
+```lua
+-- local sound = script.Parent:FindFirstChild("Sound")
+local sound = import "./Sound"
+
+-- local sound = script.Parent:FindFirstChild("Part")
+local part = import "./Part"
+```
+
+### Config
+
 You can set aliases to define starting points for your paths:
 
 ```lua
