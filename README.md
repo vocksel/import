@@ -89,6 +89,13 @@ local sound = import("./Sound")
 local part = import("./Part")
 ```
 
+By default, `import` will throw an error when modulescripts attempt to import eachother in a recursive loop (which would otherwise silently fail). This feature was designed with the assumption the user only has a singular script or localscript as the entry point to the codebase, and you can disable it if the feature causes problems.
+```lua
+import.setConfig({
+	detectRequireLoops = false
+})
+```
+
 ## Development
 
 Install [Rojo](https://github.com/rojo-rbx/rojo/) and then run the following commands:
@@ -102,4 +109,4 @@ Open the newly generated place file and start the Rojo plugin.
 
 From here you can modify anything under `src/` and your changes will be synced in.
 
-When you're ready to test, simply press F5 to play the.
+When you're ready to test, simply press F5 to play.

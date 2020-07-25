@@ -5,6 +5,7 @@ local IConfig = t.strictInterface({
 	aliases = t.map(t.string, t.instanceIsA("Instance")),
 	useWaitForChild = t.boolean,
 	waitForChildTimeout = t.number,
+	detectRequireLoops = t.boolean,
 })
 
 --[[
@@ -56,11 +57,35 @@ function Importer.new(dataModel)
 		aliases = {},
 		useWaitForChild = false,
 		waitForChildTimeout = 1,
+		detectRequireLoops = true,
 	}
+
+	self._currentlyRequiring = {}
 
 	assert(IConfig(self._config))
 
     return self
+end
+
+function Importer:setIsCurrentlyRequiring(module, isRequiring)
+	if isRequiring then
+		table.insert(self._currentlyRequiring, module)
+	else
+		for i = #self._currentlyRequiring, 1, -1 do
+			if self._currentlyRequiring[i] == module then
+				table.remove(self._currentlyRequiring, i)
+				break
+			end
+		end
+	end
+end
+
+function Importer:checkIfAlreadyWaitingForRequire(module)
+	for i, requiringModule in pairs(self._currentlyRequiring) do
+		if requiringModule == module then
+			return true, i
+		end
+	end
 end
 
 function Importer:setConfig(newValues)
@@ -149,7 +174,7 @@ function Importer:import(callingScript, path, exports)
 		local nextInstance = self:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 
 		if isFirstPart then
-			assert(nextInstance, ("Import: '%s' is not the name of a service, alias, or child of current dataModel (%s)")
+			assert(nextInstance, ("'%s' is not the name of a service, alias, or child of current dataModel (%s)")
 				:format(pathPart, self.dataModel.Name))
 		else
 			assert(nextInstance, ("Could not find a child '%s' at \"%s.%s\"")
@@ -167,10 +192,32 @@ function Importer:import(callingScript, path, exports)
 	end
 
 	if current:IsA("ModuleScript") then
+		local module
+
+		if self._config.detectRequireLoops then
+			local isRecursivelyRequiring, startIndex = self:checkIfAlreadyWaitingForRequire(current)
+			if isRecursivelyRequiring then
+				local recursionPathStr = current.Name
+				for i = startIndex+1, #self._currentlyRequiring do
+					local module = self._currentlyRequiring[i]
+					recursionPathStr = recursionPathStr .. " - > " .. module.Name
+				end
+				recursionPathStr = recursionPathStr .. " - > " .. current.Name
+
+				error(("Require loop! %s"):format(recursionPathStr))
+			end
+
+			self:setIsCurrentlyRequiring(current, true)
+			module = require(current)
+			self:setIsCurrentlyRequiring(current, false)
+		else
+			module = require(current)
+		end
+
 		if exports then
 			return getExports(current, exports)
 		else
-			return require(current)
+			return module
 		end
 	else
 		return current

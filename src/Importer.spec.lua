@@ -39,6 +39,7 @@ return function()
 				aliases = { foo = Instance.new("Part") },
 				useWaitForChild = true,
 				waitForChildTimeout = 1,
+				detectRequireLoops = false,
 			})
 
 			expect(importer._config).to.never.equal(oldConfig)
@@ -139,7 +140,7 @@ return function()
 			expect(module.foo).to.equal("foo")
 		end)
 
-		it("should import a sibling module (script.Parent:FindFirstChild())", function()
+		it("should import a module from a sibling one level down (script.Parent.ReplicatedStorage:FindFirstChild())", function()
 			local mockScript = Instance.new("Script")
 			local mockModule = MOCK_TABLE_MODULE:Clone()
 
@@ -180,10 +181,6 @@ return function()
 
 			expect(instance).to.equal(part)
 		end)
-
-		-- This is something that we may want to implement later but currently
-		-- is not something that oculd be seen as actively used when we have
-		-- aliases.
 
 		it("should have support for paths relative to the DataModel", function()
 			local mockScript = Instance.new("Script")
@@ -235,6 +232,14 @@ return function()
 			expect(module.foo).to.equal("foo")
 		end)
 
+		it("should detect require loops and error", function()
+			local mocks = script.Parent.mocks.recursionTest
+			local import = require(mocks.import)
+
+			expect(function()
+				local module = import "recursiveModule"
+			end).to.throw()
+		end)
 
 		describe("roblox services", function()
 			it("should have support for Roblox services", function()
