@@ -2,7 +2,9 @@ local Cryo = require(script.Parent.lib.Cryo)
 local t = require(script.Parent.lib.t)
 
 local IConfig = t.strictInterface({
-	aliases = t.map(t.string, t.instanceIsA("Instance"))
+	aliases = t.map(t.string, t.instanceIsA("Instance")),
+	useWaitForChild = t.boolean,
+	waitForChildTimeout = t.number,
 })
 
 --[[
@@ -51,7 +53,9 @@ function Importer.new(dataModel)
 	self.dataModel = dataModel or game
 
 	self._config = {
-		aliases = {}
+		aliases = {},
+		useWaitForChild = false,
+		waitForChildTimeout = 1,
 	}
 
 	assert(IConfig(self._config))
@@ -65,6 +69,15 @@ function Importer:setConfig(newValues)
 	assert(IConfig(newConfig))
 
 	self._config = newConfig
+end
+
+function Importer:getChild(instance, childName)
+	if self._config.useWaitForChild then
+		local timeout = self._config.waitForChildTimeout
+		return instance:WaitForChild(childName, timeout)
+	end
+
+	return instance:FindFirstChild(childName)
 end
 
 --[[
@@ -109,10 +122,10 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 				return game:GetService(pathPart)
 			end
 
-			return self.dataModel:FindFirstChild(pathPart)
+			return self:getChild(current, pathPart)
 		end
 
-		return current:FindFirstChild(pathPart)
+		return self:getChild(current, pathPart)
 	end
 end
 
@@ -135,7 +148,7 @@ function Importer:import(callingScript, path, exports)
 
 		if isFirstPart then
 			assert(nextInstance, ("Import: '%s' is not the name of a service, alias, or child of current dataModel (%s)")
-				:format(pathPart, self.dataModel))
+				:format(pathPart, self.dataModel.Name))
 		else
 			assert(nextInstance, ("Could not find a child '%s' at \"%s.%s\"")
 				:format(pathPart, current:GetFullName(), pathPart))

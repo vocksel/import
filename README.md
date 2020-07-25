@@ -70,6 +70,15 @@ import.setConfig({
 local module = import("shared/Module")
 ```
 
+You can also configure the module to use WaitForChild, with a configurable timeout
+
+```lua
+import.setConfig({
+	useWaitForChild = true
+	waitForChildTimeout = 1
+})
+```
+
 Works for any Roblox instance, so you can use this to import assets as well:
 
 ```lua

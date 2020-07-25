@@ -36,7 +36,9 @@ return function()
 			local oldConfig = importer._config
 
 			importer:setConfig({
-				aliases = { foo = Instance.new("Part") }
+				aliases = { foo = Instance.new("Part") },
+				useWaitForChild = true,
+				waitForChildTimeout = 1,
 			})
 
 			expect(importer._config).to.never.equal(oldConfig)
@@ -54,6 +56,29 @@ return function()
 	end)
 
 	describe("import", function()
+		it("shouldn't break if using waitForChild", function()
+			local mockScript = Instance.new("Script")
+			local mockModule = MOCK_TABLE_MODULE:Clone()
+
+			local mockDataModel = newFolder({
+				Module = mockModule,
+				Script = mockScript,
+			})
+
+			local importer = Importer.new(mockDataModel)
+
+			importer:setConfig({
+				useWaitForChild = true,
+				waitForChildTimeout = 1
+			})
+
+			-- local module = require(script.Parent.Module)
+			local module = importer:import(mockScript, "./Module")
+
+			expect(type(module)).to.equal("table")
+			expect(module.foo).to.equal("foo")
+		end)
+
 		it("should import a module from the same level (script.Parent)", function()
 			local mockScript = Instance.new("Script")
 			local mockModule = MOCK_TABLE_MODULE:Clone()
