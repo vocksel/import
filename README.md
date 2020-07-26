@@ -20,17 +20,20 @@ Having to constantly type `script.Parent` with varying levels of `.Parent` is te
 ```lua
 local import = require(game.ReplicatedStorage.Import)
 
+-- local module = require(script.Module)
+local module = import "script/Module"
+
 -- local module = require(script.Parent.Module)
-local module = import("./Module")
+local module = import "./Module"
 
 -- local module = require(script.Parent.Folder.Module)
-local module = import("./Folder/Module")
+local module = import "./Folder/Module"
 
 -- local module = require(script.Parent.Parent.Module)
-local module = import("../Module")
+local module = import "../Module"
 
 -- local module = require(script.Parent.Parent.Parent.Module)
-local module = import("../../Module")
+local module = import "../../Module"
 ```
 
 If you only care about a few members of a module, you can import them individually:
@@ -45,6 +48,28 @@ local foo = import("./Module", { "foo" })
 local foo, bar = import("./Module", { "foo", "bar" })
 ```
 
+If your datamodel is set to game, children of Roblox services can be imported by starting the path with a name of a service:
+
+```lua
+-- local module = require(game:GetService("ReplicatedStorage").module)
+local module = import "ReplicatedStorage/module"
+
+-- local module = require(game:GetService("ServerStorage").module)
+local module = import "ServerStorage/module"
+```
+
+Works for any Roblox instance, so you can use this to import assets as well:
+
+```lua
+-- local sound = script.Parent:FindFirstChild("Sound")
+local sound = import "./Sound"
+
+-- local sound = script.Parent:FindFirstChild("Part")
+local part = import "./Part"
+```
+
+### Config
+
 You can set aliases to define starting points for your paths:
 
 ```lua
@@ -55,17 +80,34 @@ import.setConfig({
 })
 
 -- local module = require(game.ReplicatedStorage.Shared.Module)
-local module = import("shared/Module")
+local module = import "shared/Module"
 ```
 
-Works for any Roblox instance, so you can use this to import assets as well:
+You can also configure the module to use WaitForChild, with a configurable timeout
 
 ```lua
--- local sound = script.Parent:FindFirstChild("Sound")
-local sound = import("./Sound")
+import.setConfig({
+	useWaitForChild = true
+	waitForChildTimeout = 1
+})
+```
 
--- local part = script.Parent:FindFirstChild("Part")
-local part = import("./Part")
+You can configure the alias which you use to represent `script` in your paths.
+
+```lua
+import.setConfig({
+	currentScriptAlias = "@"
+})
+
+-- local module = require(script.Module)
+local module = import "@/Module"
+```
+
+By default, `import` will throw an error when modulescripts attempt to import eachother in a recursive loop (which would otherwise silently fail). This feature was designed with the assumption the user only has a singular script or localscript as the entry point to the codebase, and you can disable it if the feature causes problems.
+```lua
+import.setConfig({
+	detectRequireLoops = false
+})
 ```
 
 ## Development
@@ -81,4 +123,4 @@ Open the newly generated place file and start the Rojo plugin.
 
 From here you can modify anything under `src/` and your changes will be synced in.
 
-When you're ready to test, simply press F5 to play the.
+When you're ready to test, simply press F5 to play.

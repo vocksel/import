@@ -2,7 +2,11 @@ local Cryo = require(script.Parent.lib.Cryo)
 local t = require(script.Parent.lib.t)
 
 local IConfig = t.strictInterface({
-	aliases = t.map(t.string, t.instanceIsA("Instance"))
+	aliases = t.map(t.string, t.instanceIsA("Instance")),
+	useWaitForChild = t.boolean,
+	waitForChildTimeout = t.number,
+	detectRequireLoops = t.boolean,
+	currentScriptAlias = t.string,
 })
 
 --[[
@@ -16,19 +20,28 @@ local IConfig = t.strictInterface({
 		-- foo.server.lua
 		local foo = getExports(module, { "foo" })
 ]]
-local function getExports(module, exports)
-	local requiredModule = require(module)
+local function getExports(moduleResult, exports,  moduleFullName)
 	local tuple = {}
 
 	for _, name in ipairs(exports) do
-		local export = requiredModule[name]
-		assert(export, ("%s has no export named %s"):format(module:GetFullName(), name))
+		local export = moduleResult[name]
+		assert(export, ("%s has no export named %s"):format(moduleFullName, name))
 		table.insert(tuple, export)
 	end
 
 	return unpack(tuple)
 end
 
+--[[
+	FindService and GetService both throw with invalid service names, so we
+	wrap it in a pcall and pray.
+]]
+local function checkIfIsService(name)
+	local success = pcall(function()
+		game:FindService(name)
+	end)
+	return success
+end
 
 local Importer = {}
 Importer.__index = Importer
@@ -41,13 +54,73 @@ function Importer.new(dataModel)
 	self.dataModel = dataModel or game
 
 	self._config = {
-		aliases = {}
+		aliases = {},
+		useWaitForChild = false,
+		waitForChildTimeout = 1,
+		detectRequireLoops = true,
+		currentScriptAlias = "script",
 	}
+
+	self._currentlyRequiring = {}
 
 	assert(IConfig(self._config))
 
     return self
 end
+
+function Importer:isWaitingForRequire(module)
+	for i, requiringModule in pairs(self._currentlyRequiring) do
+		if requiringModule == module then
+			return true, i
+		end
+	end
+end
+
+function Importer:buildRequireLoopPathString(startIndex, moduleName)
+	local recursionPathStr = moduleName
+	for i = startIndex+1, #self._currentlyRequiring do
+		local module = self._currentlyRequiring[i]
+		recursionPathStr = recursionPathStr .. " - > " .. module.Name
+	end
+	recursionPathStr = recursionPathStr .. " - > " .. moduleName
+
+	return recursionPathStr
+end
+
+function Importer:requireWithLoopDetection(module)
+	local isWaiting, startIndex = self:isWaitingForRequire(module)
+
+	-- If a require for a module hasn't completed when another module tries to
+	-- require it, we know thatit's attempting to require modules in a loop.
+	if isWaiting then
+		local loopPath = Importer:buildRequireLoopPathString(startIndex, module.Name)
+		error(("Require loop! %s"):format(loopPath))
+	end
+
+	-- Add the module we're attempting to require to the list of modules being
+	-- required.
+	table.insert(self._currentlyRequiring, module)
+
+	-- Because requiring a module runs all the code in the module first before
+	-- returning, any import calls that modulevau makes will run before require
+	-- actually returns. Because of this, by adding the module to the list of
+	-- requiring modules, we can build out a chain of dependencies. Once the
+	-- deepest modules are required, the rcursion completes, and all the modules
+	-- return their values, at which point we remove them from the currently
+	-- requiring table.
+	local result = require(module)
+
+	-- Once the module has been required, we can remove it from the list of modules being required.
+	for i = #self._currentlyRequiring, 1, -1 do
+		if self._currentlyRequiring[i] == module then
+			table.remove(self._currentlyRequiring, i)
+			break
+		end
+	end
+
+	return result
+end
+
 
 function Importer:setConfig(newValues)
 	local newConfig = Cryo.Dictionary.join(self._config, newValues)
@@ -55,6 +128,15 @@ function Importer:setConfig(newValues)
 	assert(IConfig(newConfig))
 
 	self._config = newConfig
+end
+
+function Importer:getChild(instance, childName)
+	if self._config.useWaitForChild then
+		local timeout = self._config.waitForChildTimeout
+		return instance:WaitForChild(childName, timeout)
+	end
+
+	return instance:FindFirstChild(childName)
 end
 
 --[[
@@ -73,10 +155,12 @@ local getNextInstanceCheck = t.tuple(
 	t.string,
 	t.boolean
 )
-function Importer:getNextInstance(current, pathPart, hasAscendedParents)
+function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 	assert(getNextInstanceCheck(current, pathPart, hasAscendedParents))
 
-	if pathPart == "." then
+	if pathPart == self._config.currentScriptAlias then
+		return current
+	elseif pathPart == "." then
 		return current.Parent
 	elseif pathPart == ".." then
 		if hasAscendedParents then
@@ -85,13 +169,24 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents)
 			return current.Parent.Parent
 		end
 	else
-		local alias = self._config.aliases[pathPart]
+		if isFirstPart then
+			local alias = self._config.aliases[pathPart]
+			local isService = self.dataModel == game and checkIfIsService(pathPart)
 
-		if alias then
-			return alias
-		else
-			return current:FindFirstChild(pathPart)
+			if alias then
+				if isService then
+					warn("Import: Alias '%s' is also defined as a Roblox service. Using alias instead.")
+				end
+
+				return alias
+			elseif isService then
+				return game:GetService(pathPart)
+			else
+				return self:getChild(self.dataModel, pathPart)
+			end
 		end
+
+		return self:getChild(current, pathPart)
 	end
 end
 
@@ -105,12 +200,20 @@ function Importer:import(callingScript, path, exports)
 	assert(importCheck(callingScript, path, exports))
 
 	local parts = path:split("/")
-	local current =  callingScript
+	local current = callingScript
 	local hasAscendedParents = false
+	local isFirstPart = true
 
 	for _, pathPart in pairs(parts) do
-		local nextInstance = self:getNextInstance(current, pathPart, hasAscendedParents)
+		local nextInstance = self:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 
+		if isFirstPart then
+			assert(nextInstance, ("'%s' is not the name of a service, alias, or child of current dataModel (%s)")
+				:format(pathPart, self.dataModel.Name))
+		else
+			assert(nextInstance, ("Could not find a child '%s' at \"%s.%s\"")
+				:format(pathPart, current:GetFullName(), pathPart))
+		end
 		-- This makes sure that `../` will take you up into the parent of the
 		-- script (script.Parent.Parent), but `../../` will only take you up
 		-- one extra parent after that.
@@ -118,16 +221,23 @@ function Importer:import(callingScript, path, exports)
 			hasAscendedParents = true
 		end
 
-		assert(nextInstance, ("Could not find \"%s.%s\""):format(current:GetFullName(), pathPart))
-
 		current = nextInstance
+		isFirstPart = false
 	end
 
 	if current:IsA("ModuleScript") then
-		if exports then
-			return getExports(current, exports)
+		local result
+
+		if self._config.detectRequireLoops then
+			result = self:requireWithLoopDetection(current)
 		else
-			return require(current)
+			result = require(current)
+		end
+
+		if exports then
+			return getExports(result, exports, current:GetFullName())
+		else
+			return result
 		end
 	else
 		return current
