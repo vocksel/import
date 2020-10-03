@@ -36,11 +36,12 @@ end
 	FindService and GetService both throw with invalid service names, so we
 	wrap it in a pcall and pray.
 ]]
-local function checkIfIsService(name)
-	local success = pcall(function()
-		game:FindService(name)
+local function getIfService(name)
+	local service
+	pcall(function()
+		service = game:FindService(name)
 	end)
-	return success
+	return service
 end
 
 local Importer = {}
@@ -171,11 +172,11 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 	else
 		if isFirstPart then
 			local alias = self._config.aliases[pathPart]
-			local isService = self.dataModel == game and checkIfIsService(pathPart)
+			local isService = self.dataModel == game and getIfService(pathPart) ~= nil
 
 			if alias then
 				if isService then
-					warn("Import: Alias '%s' is also defined as a Roblox service. Using alias instead.")
+					warn(("Import: Alias '%s' is also defined as a Roblox service. Using alias instead."):format(pathPart))
 				end
 
 				return alias
@@ -211,7 +212,7 @@ function Importer:import(callingScript, path, exports)
 			assert(nextInstance, ("'%s' is not the name of a service, alias, or child of current dataModel (%s)")
 				:format(pathPart, self.dataModel.Name))
 		else
-			assert(nextInstance, ("Could not find a child '%s' at \"%s.%s\"")
+			assert(nextInstance, ("Could not find a child '%s' in \"%s\"")
 				:format(pathPart, current:GetFullName(), pathPart))
 		end
 		-- This makes sure that `../` will take you up into the parent of the
