@@ -94,7 +94,7 @@ function Importer:requireWithLoopDetection(module)
 	-- If a require for a module hasn't completed when another module tries to
 	-- require it, we know thatit's attempting to require modules in a loop.
 	if isWaiting then
-		local loopPath = Importer:buildRequireLoopPathString(startIndex, module.Name)
+		local loopPath = self:buildRequireLoopPathString(startIndex, module.Name)
 		error(("Require loop! %s"):format(loopPath))
 	end
 
