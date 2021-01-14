@@ -7,6 +7,7 @@ local IConfig = t.strictInterface({
 	waitForChildTimeout = t.number,
 	detectRequireLoops = t.boolean,
 	currentScriptAlias = t.string,
+	dataModel = t.Instance,
 })
 
 --[[
@@ -51,15 +52,13 @@ function Importer.new(dataModel)
     local self = {}
     setmetatable(self, Importer)
 
-	-- Allows you to mock the DataModel to be anything you want.
-	self.dataModel = dataModel or game
-
 	self._config = {
 		aliases = {},
 		useWaitForChild = false,
 		waitForChildTimeout = 1,
 		detectRequireLoops = true,
 		currentScriptAlias = "script",
+		dataModel = dataModel or game,
 	}
 
 	self._currentlyRequiring = {}
@@ -172,7 +171,7 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 	else
 		if isFirstPart then
 			local alias = self._config.aliases[pathPart]
-			local isService = self.dataModel == game and getIfService(pathPart) ~= nil
+			local isService = self._config.dataModel == game and getIfService(pathPart) ~= nil
 
 			if alias then
 				if isService then
@@ -183,7 +182,7 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 			elseif isService then
 				return game:GetService(pathPart)
 			else
-				return self:getChild(self.dataModel, pathPart)
+				return self:getChild(self._config.dataModel, pathPart)
 			end
 		end
 
@@ -210,7 +209,7 @@ function Importer:import(callingScript, path, exports)
 
 		if isFirstPart then
 			assert(nextInstance, ("'%s' is not the name of a service, alias, or child of current dataModel (%s)")
-				:format(pathPart, self.dataModel.Name))
+				:format(pathPart, self._config.dataModel.Name))
 		else
 			assert(nextInstance, ("Could not find a child '%s' in \"%s\"")
 				:format(pathPart, current:GetFullName(), pathPart))

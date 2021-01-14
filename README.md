@@ -48,7 +48,7 @@ local foo = import("./Module", { "foo" })
 local foo, bar = import("./Module", { "foo", "bar" })
 ```
 
-If your datamodel is set to game, children of Roblox services can be imported by starting the path with a name of a service:
+If your dataModel is set to `game` (this is true by default), children of Roblox services can be imported by starting the path with a name of a service:
 
 ```lua
 -- local module = require(game:GetService("ReplicatedStorage").module)
@@ -69,6 +69,18 @@ local part = import "./Part"
 ```
 
 ### Config
+
+You can override the default dataModel of `game` with your own dataModel. This is useful if you're using Import in a library or plugin, or any other case where you don't know the exact path to scripts in your project relative to `game`.
+
+```lua
+local pluginOrLibraryRoot = script.Parent
+import.setConfig({
+	dataModel = pluginOrLibraryRoot
+})
+
+-- local coreModule = require(script.Parent.CoreModules.Module)
+local coreModule = import "CoreModules/Module"
+```
 
 You can set aliases to define starting points for your paths:
 
