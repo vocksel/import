@@ -1,12 +1,19 @@
-# import
+# import("./Module")
 
 This module allows you to write paths for Roblox instances like you do on the filesystem.
 
 Having to constantly type `script.Parent` with varying levels of `.Parent` is tedious and can produce excessively long lines. This module aims to fix this by providing a concise syntax for writing import paths that closely resembles what's used on the filesystem.
 
-## Download
+## Installation
 
-Download the latest version from the [releases page](https://github.com/vocksel/import/releases) or from the [asset library](https://www.roblox.com/library/7218303036/import)
+**Model File (Roblox Studio)**
+- Download the `rbxm` model file attached to the latest release from the [GitHub releases page](https://github.com/vocksel/import/releases).
+- Insert the model into Studio into a place like `ReplicatedStorage`
+
+**Filesystem**
+- Copy the `src` directory into your codebase
+- Rename the folder to `import`
+- Use a plugin like [Rojo](https://github.com/LPGhatguy/rojo) to sync the files into a place
 
 ## Usage
 
@@ -57,7 +64,7 @@ Works for any Roblox instance, so you can use this to import assets as well:
 -- local sound = script.Parent:FindFirstChild("Sound")
 local sound = import "./Sound"
 
--- local part = script.Parent:FindFirstChild("Part")
+-- local sound = script.Parent:FindFirstChild("Part")
 local part = import "./Part"
 ```
 
@@ -117,24 +124,15 @@ import.setConfig({
 
 ## Development
 
-You will need [Rust](https://www.rust-lang.org/) 1.41.0+ and the [Rojo plugin](https://www.roblox.com/library/4048317704/Rojo-6). If you use VS Code, you can install the [Rojo extension](https://marketplace.visualstudio.com/items?itemName=evaera.vscode-rojo) which manages the plugin for you and makes it easier to serve the project.
-
-It is also recommended that you add `~/.foreman/bin` to your `PATH` to make the tools that Foreman installs for you accessible on your system.
+Install [Rojo](https://github.com/rojo-rbx/rojo/) and then run the following commands:
 
 ```sh
-# Cargo is Rust's package manager, Foreman is our toolchain manager
-cargo install foreman
-
-# Install Rojo and other tools we use
-foreman install
-
-# Serve the project. Use the Rojo plugin in Roblox Studio to connect
-rojo serve dev.project.json
-
-# Or build the Dev Module as a model file. Drag and drop into Roblox Studio to insert it
-rojo build -o dev-module.rbxmx
+$ rojo build -o place.rbxlx
+$ rojo serve
 ```
 
-## License
+Open the newly generated place file and start the Rojo plugin.
 
-MIT
+From here you can modify anything under `src/` and your changes will be synced in.
+
+When you're ready to test, simply press F5 to play.
