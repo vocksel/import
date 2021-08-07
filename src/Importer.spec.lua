@@ -164,7 +164,8 @@ return function()
 			local mockScript = Instance.new("Script")
 			local mockModule = MOCK_TABLE_MODULE:Clone()
 
-			local part = Instance.new("Part", mockScript)
+			local part = Instance.new("Part")
+			part.Parent = mockScript
 
 			local mockDataModel = newFolder({
 				ServerScriptService = newFolder({
@@ -237,7 +238,8 @@ return function()
 			local mockScript = Instance.new("Script")
 			local mockModule = MOCK_TABLE_MODULE:Clone()
 
-			local part = Instance.new("Part", mockScript)
+			local part = Instance.new("Part")
+			part.Parent = mockScript
 
 			local mockDataModel = newFolder({
 				ServerScriptService = newFolder({
@@ -258,16 +260,16 @@ return function()
 			})
 
 			-- local module = require(path.to.alias.Module)
-			local part = importer:import(mockScript, "@/Part")
+			local importedPart = importer:import(mockScript, "@/Part")
 
-			expect(part).to.equal(part)
+			expect(importedPart).to.equal(part)
 		end)
 
 		it("should detect require loops and error", function()
 			local import = require(script.Parent)
 
 			expect(function()
-				local module = import "./recursionTest/recursiveModule"
+				import "./recursionTest/recursiveModule"
 			end).to.throw()
 		end)
 
