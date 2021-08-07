@@ -1,0 +1,29 @@
+name: Style
+
+on:
+  pull_request
+
+jobs:
+  style:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Foreman dependencies
+        uses: Roblox/setup-foreman@v1
+        with:
+          version: "^1.0.1"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log versions
+        shell: bash
+        run: foreman list
+
+      - name: Lint
+        run: |
+          selene generate-roblox-std
+          selene src/
+
+      - name: Format
+        run: stylua --check src/

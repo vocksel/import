@@ -1,4 +1,4 @@
 local import = require(script.Parent.Parent.Parent)
-import "./fooModule"
+import("./fooModule")
 
 return {}
