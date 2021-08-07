@@ -20,13 +20,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Roblox Studio
-				uses: OrbitalOwen/roblox-win-installer-action@1.1
+        uses: OrbitalOwen/roblox-win-installer-action@1.1
         with:
           cookie: ${{ secrets.ROBLOSECURITY }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-			- name: Build place file
-				run: rojo build dev.project.json -o import.rbxlx
+      - name: Build place file
+        run: rojo build dev.project.json -o import.rbxlx
 
-			- name: Run tests
-				run: run-in-roblox --place import.rbxlx --script run-tests.lua
+      - name: Run tests
+        run: run-in-roblox --place import.rbxlx --script run-tests.lua
