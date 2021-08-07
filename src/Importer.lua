@@ -10,6 +10,10 @@ local IConfig = t.strictInterface({
 	dataModel = t.Instance,
 })
 
+local ALIAS_IS_ROBLOX_SERVICE = "Import: Alias '%s' is also defined as a Roblox service. Using alias instead."
+local COULD_NOT_RESOLVE_PATH = "'%s' is not the name of a service, alias, or child of current dataModel (%s)"
+local COULD_NOT_FIND_CHILD = "Could not find a child '%s' in \"%s\""
+
 --[[
 	Allows exporting individual members of a module.
 
@@ -21,7 +25,7 @@ local IConfig = t.strictInterface({
 		-- foo.server.lua
 		local foo = getExports(module, { "foo" })
 ]]
-local function getExports(moduleResult, exports,  moduleFullName)
+local function getExports(moduleResult, exports, moduleFullName)
 	local tuple = {}
 
 	for _, name in ipairs(exports) do
@@ -49,8 +53,8 @@ local Importer = {}
 Importer.__index = Importer
 
 function Importer.new(dataModel)
-    local self = {}
-    setmetatable(self, Importer)
+	local self = {}
+	setmetatable(self, Importer)
 
 	self._config = {
 		aliases = {},
@@ -65,7 +69,7 @@ function Importer.new(dataModel)
 
 	assert(IConfig(self._config))
 
-    return self
+	return self
 end
 
 function Importer:isWaitingForRequire(module)
@@ -78,7 +82,7 @@ end
 
 function Importer:buildRequireLoopPathString(startIndex, moduleName)
 	local recursionPathStr = moduleName
-	for i = startIndex+1, #self._currentlyRequiring do
+	for i = startIndex + 1, #self._currentlyRequiring do
 		local module = self._currentlyRequiring[i]
 		recursionPathStr = recursionPathStr .. " - > " .. module.Name
 	end
@@ -121,7 +125,6 @@ function Importer:requireWithLoopDetection(module)
 	return result
 end
 
-
 function Importer:setConfig(newValues)
 	local newConfig = Cryo.Dictionary.join(self._config, newValues)
 
@@ -150,11 +153,7 @@ end
 	only expect to go up one more parent.
 ]]
 
-local getNextInstanceCheck = t.tuple(
-	t.Instance,
-	t.string,
-	t.boolean
-)
+local getNextInstanceCheck = t.tuple(t.Instance, t.string, t.boolean)
 function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 	assert(getNextInstanceCheck(current, pathPart, hasAscendedParents))
 
@@ -175,7 +174,7 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 
 			if alias then
 				if isService then
-					warn(("Import: Alias '%s' is also defined as a Roblox service. Using alias instead."):format(pathPart))
+					warn(ALIAS_IS_ROBLOX_SERVICE:format(pathPart))
 				end
 
 				return alias
@@ -190,11 +189,7 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 	end
 end
 
-local importCheck = t.tuple(
-	t.instanceIsA("LuaSourceContainer"),
-	t.string,
-	t.optional(t.array(t.string))
-)
+local importCheck = t.tuple(t.instanceIsA("LuaSourceContainer"), t.string, t.optional(t.array(t.string)))
 
 function Importer:import(callingScript, path, exports)
 	assert(importCheck(callingScript, path, exports))
@@ -208,11 +203,9 @@ function Importer:import(callingScript, path, exports)
 		local nextInstance = self:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 
 		if isFirstPart then
-			assert(nextInstance, ("'%s' is not the name of a service, alias, or child of current dataModel (%s)")
-				:format(pathPart, self._config.dataModel.Name))
+			assert(nextInstance, COULD_NOT_RESOLVE_PATH:format(pathPart, self._config.dataModel.Name))
 		else
-			assert(nextInstance, ("Could not find a child '%s' in \"%s\"")
-				:format(pathPart, current:GetFullName(), pathPart))
+			assert(nextInstance, COULD_NOT_FIND_CHILD:format(pathPart, current:GetFullName(), pathPart))
 		end
 		-- This makes sure that `../` will take you up into the parent of the
 		-- script (script.Parent.Parent), but `../../` will only take you up

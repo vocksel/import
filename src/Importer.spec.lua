@@ -22,10 +22,12 @@ return function()
 	describe("setConfig", function()
 		it("should allow you to change internal values", function()
 			local importer = Importer.new()
-			local aliases =  { foo = Instance.new("Part") }
+			local aliases = {
+				foo = Instance.new("Part"),
+			}
 
 			importer:setConfig({
-				aliases = aliases
+				aliases = aliases,
 			})
 
 			expect(importer._config.aliases).to.equal(aliases)
@@ -51,7 +53,7 @@ return function()
 
 			expect(function()
 				importer:setConfig({
-					thisWillNeverExistAndIfItDoesWeHaveBiggerProblems = true
+					thisWillNeverExistAndIfItDoesWeHaveBiggerProblems = true,
 				})
 			end).to.throw()
 		end)
@@ -71,7 +73,7 @@ return function()
 
 			importer:setConfig({
 				useWaitForChild = true,
-				waitForChildTimeout = 1
+				waitForChildTimeout = 1,
 			})
 
 			-- local module = require(script.Parent.Module)
@@ -107,12 +109,12 @@ return function()
 				Module = mockModule,
 				ServerScriptService = newFolder({
 					Script = mockScript,
-				})
+				}),
 			})
 
 			local importer = Importer.new(mockDataModel)
 
-			 -- local module = require(script.Parent.Parent.foo)
+			-- local module = require(script.Parent.Parent.foo)
 			local module = importer:import(mockScript, "../Module")
 
 			expect(type(module)).to.equal("table")
@@ -128,37 +130,40 @@ return function()
 				ReplicatedStorage = newFolder({
 					Nesting = newFolder({
 						Script = mockScript,
-					})
-				})
+					}),
+				}),
 			})
 
 			local importer = Importer.new(mockDataModel)
 
-			 -- local module = require(script.Parent.Parent.Parent.Module)
+			-- local module = require(script.Parent.Parent.Parent.Module)
 			local module = importer:import(mockScript, "../../Module")
 
 			expect(type(module)).to.equal("table")
 			expect(module.foo).to.equal("foo")
 		end)
 
-		it("should import a module from a sibling one level down (script.Parent.ReplicatedStorage:FindFirstChild())", function()
-			local mockScript = Instance.new("Script")
-			local mockModule = MOCK_TABLE_MODULE:Clone()
+		it(
+			"should import a module from a sibling one level down (script.Parent.ReplicatedStorage:FindFirstChild())",
+			function()
+				local mockScript = Instance.new("Script")
+				local mockModule = MOCK_TABLE_MODULE:Clone()
 
-			local mockDataModel = newFolder({
-				Script = mockScript,
-				ReplicatedStorage = newFolder({
-					Module = mockModule,
+				local mockDataModel = newFolder({
+					Script = mockScript,
+					ReplicatedStorage = newFolder({
+						Module = mockModule,
+					}),
 				})
-			})
 
-			local importer = Importer.new(mockDataModel)
+				local importer = Importer.new(mockDataModel)
 
-			local module = importer:import(mockScript, "./ReplicatedStorage/Module")
+				local module = importer:import(mockScript, "./ReplicatedStorage/Module")
 
-			expect(type(module)).to.equal("table")
-			expect(module.foo).to.equal("foo")
-		end)
+				expect(type(module)).to.equal("table")
+				expect(module.foo).to.equal("foo")
+			end
+		)
 
 		it("should import children of the current script (script:FindFirstChild)", function()
 			local mockScript = Instance.new("Script")
@@ -173,7 +178,7 @@ return function()
 				}),
 				ReplicatedStorage = newFolder({
 					Module = mockModule,
-				})
+				}),
 			})
 
 			local importer = Importer.new(mockDataModel)
@@ -194,7 +199,7 @@ return function()
 				}),
 				ReplicatedStorage = newFolder({
 					Module = mockModule,
-				})
+				}),
 			})
 
 			local importer = Importer.new(mockDataModel)
@@ -216,15 +221,15 @@ return function()
 				}),
 				ReplicatedStorage = newFolder({
 					Module = mockModule,
-				})
+				}),
 			})
 
 			local importer = Importer.new(mockDataModel)
 
 			importer:setConfig({
 				aliases = {
-					alias = mockDataModel.ReplicatedStorage
-				}
+					alias = mockDataModel.ReplicatedStorage,
+				},
 			})
 
 			-- local module = require(path.to.alias.Module)
@@ -247,16 +252,16 @@ return function()
 				}),
 				ReplicatedStorage = newFolder({
 					Module = mockModule,
-				})
+				}),
 			})
 
 			local importer = Importer.new(mockDataModel)
 
 			importer:setConfig({
 				aliases = {
-					alias = mockDataModel.ReplicatedStorage
+					alias = mockDataModel.ReplicatedStorage,
 				},
-				currentScriptAlias = "@"
+				currentScriptAlias = "@",
 			})
 
 			-- local module = require(path.to.alias.Module)
@@ -269,7 +274,7 @@ return function()
 			local import = require(script.Parent)
 
 			expect(function()
-				import "./recursionTest/recursiveModule"
+				import("./recursionTest/recursiveModule")
 			end).to.throw()
 		end)
 
