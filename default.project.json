@@ -1,39 +1,6 @@
 {
   "name": "import",
   "tree": {
-    "$className": "DataModel",
-
-    "HttpService": {
-      "$className": "HttpService",
-      "$properties": {
-        "HttpEnabled": true
-      }
-    },
-
-    "Players": {
-      "$className": "Players",
-      "$properties": {
-        "CharacterAutoLoads": false
-      }
-    },
-
-   "ReplicatedStorage": {
-      "$className": "ReplicatedStorage",
-
-      "TestEz": {
-        "$path": "lib/TestEz"
-      },
-
-      "import": {
-        "$path": "src"
-      }
-    },
-
-    "ServerScriptService": {
-      "$className": "ServerScriptService",
-      "run-tests": {
-        "$path": "run-tests.server.lua"
-      }
-    }
+    "$path": "src"
   }
 }
