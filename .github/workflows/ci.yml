@@ -30,4 +30,4 @@ jobs:
         run: rojo build dev.project.json -o import.rbxlx
 
       - name: Run tests
-        run: run-in-roblox --place import.rbxlx --script bin/spec.server.lua
+        run: run-in-roblox --place import.rbxlx --script bin/spec.lua
