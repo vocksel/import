@@ -1,4 +1,4 @@
-local t = require(script.Parent.lib.t)
+local t = require(script.Parent.t)
 local join = require(script.Parent.join)
 
 local IConfig = t.strictInterface({
