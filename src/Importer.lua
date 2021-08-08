@@ -1,5 +1,5 @@
-local Cryo = require(script.Parent.lib.Cryo)
 local t = require(script.Parent.lib.t)
+local join = require(script.Parent.join)
 
 local IConfig = t.strictInterface({
 	aliases = t.map(t.string, t.instanceIsA("Instance")),
@@ -126,7 +126,7 @@ function Importer:requireWithLoopDetection(module)
 end
 
 function Importer:setConfig(newValues)
-	local newConfig = Cryo.Dictionary.join(self._config, newValues)
+	local newConfig = join(self._config, newValues)
 
 	assert(IConfig(newConfig))
 
