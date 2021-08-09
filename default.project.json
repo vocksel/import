@@ -1,16 +1,6 @@
 {
   "name": "import",
   "tree": {
-    "lib": {
-      "$className": "Folder",
-      "Cryo": {
-        "$path": "lib/Cryo"
-      },
-      "t": {
-        "$path": "lib/t"
-      }
-    },
-
     "$path": "src"
   }
 }
