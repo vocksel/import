@@ -1,17 +1,6 @@
 return function()
 	local createPathTraverser = require(script.Parent.createPathTraverser)
-
-	local function newFolder(children)
-		local folder = Instance.new("Folder")
-		folder.Name = "root"
-
-		for k, v in pairs(children) do
-			v.Name = k
-			v.Parent = folder
-		end
-
-		return folder
-	end
+	local newFolder = require(script.Parent.newFolder)
 
 	it("should find instances one level up (script.Parent)", function()
 		local start = Instance.new("Script")
