@@ -1,3 +1,17 @@
+--[[
+	Allows exporting individual members of a module.
+
+	Usage:
+
+		-- module.lua
+		return {
+			foo = "foo"
+		}
+
+		-- foo.server.lua
+		local foo = destructure(module, { "foo" })
+]]
+
 local NOT_FOUND_ERROR = "Failed to destructure while importing (no export named %q found)"
 
 local function destructure(object, members)
