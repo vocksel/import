@@ -2,12 +2,6 @@
   "name": "import",
   "tree": {
     "$className": "DataModel",
-    "Players": {
-      "$className": "Players",
-      "$properties": {
-        "CharacterAutoLoads": false
-      }
-    },
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
       "TestEz": {
@@ -19,8 +13,11 @@
     },
     "ServerScriptService": {
       "$className": "ServerScriptService",
+      "spec": {
+        "$path": "bin/spec.lua"
+      },
       "run-tests": {
-        "$path": "run-tests.server.lua"
+        "$path": "bin/run-tests.server.lua"
       }
     }
   }

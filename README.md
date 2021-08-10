@@ -131,8 +131,8 @@ foreman install
 # Serve the project. Use the Rojo plugin in Roblox Studio to connect
 rojo serve dev.project.json
 
-# Or build the Dev Module as a model file. Drag and drop into Roblox Studio to insert it
-rojo build -o dev-module.rbxmx
+# Or build the project. Drag and drop into Roblox Studio to insert it
+rojo build -o import.rbxmx
 ```
 
 ## License
