@@ -33,7 +33,6 @@ local function createPathTraverser(root: Instance, start: Instance, aliases: tab
 				elseif pathPart == "." then
 					nextInstance = current.Parent
 				elseif alias then
-					print("alias", alias)
 					nextInstance = alias
 				end
 			end
