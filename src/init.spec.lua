@@ -11,6 +11,10 @@ return function()
 			local tableModule = import("./mocks/tableModule")
 			expect(tableModule).to.be.ok()
 		end)
+
+		it("should add a `script` alias", function()
+			expect(import("script")).to.equal(script)
+		end)
 	end)
 
 	describe("setConfig", function()
@@ -29,7 +33,7 @@ return function()
 			})
 		end)
 
-		it("should be able to change the script alias", function()
+		it("should be able to change the script alias name", function()
 			expect(import("script")).to.equal(script)
 
 			import.setConfig({
@@ -52,6 +56,20 @@ return function()
 			})
 
 			expect(import("server")).to.equal(game.ServerStorage)
+
+			-- Reset so other tests are uneffected
+			import.setAliases({})
+		end)
+
+		it("should not be able to override the `script` alias", function()
+			local newScript = Instance.new("Script")
+
+			import.setAliases({
+				["script"] = newScript,
+			})
+
+			expect(import("script")).to.never.equal(newScript)
+			expect(import("script")).to.equal(script)
 
 			-- Reset so other tests are uneffected
 			import.setAliases({})

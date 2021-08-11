@@ -84,6 +84,17 @@ return function()
 		expect(traverse("/module")).to.equal(module)
 	end)
 
+	it("should return the root", function()
+		local start = Instance.new("Script")
+		local tree = newFolder({
+			start = start,
+		})
+
+		local traverser = createPathTraverser(tree, start)
+
+		expect(traverser("/")).to.equal(tree)
+	end)
+
 	it("should find instances using absolute paths through the DataModel", function()
 		-- The start does not matter here since we're using absolute paths
 		local start = Instance.new("Script")

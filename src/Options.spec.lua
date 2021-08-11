@@ -1,5 +1,6 @@
 return function()
 	local Options = require(script.Parent.Options)
+	local t = require(script.Parent.t)
 
 	describe("get", function()
 		it("should return the options object", function()
@@ -7,7 +8,7 @@ return function()
 				foo = false,
 			})
 
-			local values = options.get()
+			local values = options.values
 
 			expect(values).to.be.a("table")
 			expect(values.foo).to.equal(false)
@@ -18,13 +19,13 @@ return function()
 				foo = false,
 			})
 
-			local oldValues = options.get()
+			local oldValues = options.values
 
 			options.set({
 				foo = true,
 			})
 
-			local newValues = options.get()
+			local newValues = options.values
 
 			expect(oldValues).to.never.equal(newValues)
 		end)
@@ -36,7 +37,7 @@ return function()
 				foo = false,
 			})
 
-			local oldValues = options.get()
+			local oldValues = options.values
 			local newValues = options.set({
 				foo = true,
 			})
@@ -47,9 +48,14 @@ return function()
 		end)
 
 		it("should throw when trying to set a value that is not in the config", function()
-			local options = Options.new({
-				foo = false,
-			})
+			local options = Options.new(
+				{
+					foo = false,
+				},
+				t.strictInterface({
+					foo = t.boolean,
+				})
+			)
 
 			expect(function()
 				options.set({

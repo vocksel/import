@@ -11,6 +11,10 @@ local function createPathTraverser(root: Instance, start: Instance, aliases: tab
 	aliases = aliases or {}
 
 	return function(path)
+		if path == "/" then
+			return root
+		end
+
 		local current = start
 		local parts = splitPath(path, root)
 
@@ -24,31 +28,26 @@ local function createPathTraverser(root: Instance, start: Instance, aliases: tab
 				local alias = aliases[pathPart]
 
 				if pathPart == root then
-					print("ROOT")
 					current = root
 					continue
 				elseif pathPart == "." then
-					print("SIBLING")
 					nextInstance = current.Parent
 				elseif alias then
-					print("ALIAS")
+					print("alias", alias)
 					nextInstance = alias
 				end
 			end
 
 			if pathPart == ".." then
 				if hasAscended or index > 1 then
-					print("UP")
 					nextInstance = current.Parent
 				else
-					print("UP (first time)")
 					nextInstance = current.Parent.Parent
 					hasAscended = true
 				end
 			end
 
 			if not nextInstance then
-				print("DOWN")
 				nextInstance = current:FindFirstChild(pathPart)
 				assert(nextInstance, COULD_NOT_FIND_CHILD:format(pathPart, path))
 			end
@@ -57,7 +56,6 @@ local function createPathTraverser(root: Instance, start: Instance, aliases: tab
 		end
 
 		assert(current, COULD_NOT_RESOLVE_PATH:format(path))
-		print(current:GetFullName())
 
 		return current
 	end

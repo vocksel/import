@@ -1,37 +1,56 @@
+local t = require(script.t)
+local join = require(script.join)
 local createImporter = require(script.createImporter)
 local Options = require(script.Options)
 
-local config = Options.new({
-	root = game,
-	useWaitForChild = false,
-	waitForChildTimeout = 1,
-	detectRequireLoops = true,
-	scriptAlias = "script",
-})
+local config = Options.new(
+	{
+		root = game,
+		useWaitForChild = false,
+		waitForChildTimeout = 1,
+		scriptAlias = "script",
+	},
+	t.strictInterface({
+		root = t.optional(t.Instance),
+		useWaitForChild = t.optional(t.boolean),
+		waitForChildTimeout = t.optional(t.number),
+		scriptAlias = t.optional(t.string),
+	})
+)
 
-local aliases = Options.new({})
+local aliases = Options.new({}, t.map(t.string, t.Instance))
 
-local function importWithCallingScript(path, exports)
-	local caller = getfenv(2).script
-	local import = createImporter(config.root, caller, {
-		waitForChildTimeout = config.waitForChildTimeout,
-		detectRequireLoops = config.detectRequireLoops,
-		aliases = aliases.get(),
+local check = t.tuple(t.string, t.optional(t.array(t.string)))
+
+local function importWithCallingScript(caller, path, exports)
+	assert(check(path, exports))
+
+	local import = createImporter(config.values.root, caller, {
+		useWaitForChild = config.values.useWaitForChild,
+		waitForChildTimeout = config.values.waitForChildTimeout,
+		scriptAlias = config.values.scriptAlias,
+		aliases = join(aliases.values, {
+			[config.values.scriptAlias] = caller,
+		}),
 	})
 
 	return import(path, exports)
 end
 
-local module = {
+local api = setmetatable({
 	setConfig = config.set,
 	setAliases = aliases.set,
-	import = importWithCallingScript,
-}
-
--- Allows this module to be called as import(), otherwise the user has to write
--- import.import()
-return setmetatable(module, {
+	import = function(path, exports)
+		local caller = getfenv(2).script
+		return importWithCallingScript(caller, path, exports)
+	end,
+}, {
+	-- Allows this module to be called as import(), otherwise the user has to write
+	-- import.import()
 	__call = function(_, path, exports)
-		importWithCallingScript(path, exports)
+		local caller = getfenv(2).script
+		return importWithCallingScript(caller, path, exports)
 	end,
 })
+
+return api
