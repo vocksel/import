@@ -13,106 +13,96 @@ Download the latest version from the [releases page](https://github.com/vocksel/
 ```lua
 local import = require(game.ReplicatedStorage.Import)
 
--- local module = require(script.Module)
-local module = import "script/Module"
+local module = import("./ModuleScript")
+-- local module = require(script.Parent.ModuleScript)
 
--- local module = require(script.Parent.Module)
-local module = import "./Module"
+local module = import("./Folder/ModuleScript)"
+-- local module = require(script.Parent.Folder.ModuleScript)
 
--- local module = require(script.Parent.Folder.Module)
-local module = import "./Folder/Module"
+local module = import("../ModuleScript")
+-- local module = require(script.Parent.Parent.ModuleScript)
 
--- local module = require(script.Parent.Parent.Module)
-local module = import "../Module"
-
--- local module = require(script.Parent.Parent.Parent.Module)
-local module = import "../../Module"
+local module = import("../../ModuleScript")
+-- local module = require(script.Parent.Parent.Parent.ModuleScript)
 ```
 
-If you only care about a few members of a module, you can import them individually:
+To get easy access to the children of Roblox services, you can use absolute paths by starting a path with a slash `/`.
 
 ```lua
--- local foo = require(script.Parent.Module).foo
-local foo = import("./Module", { "foo" })
+local module = import("/ReplicatedStorage/ModuleScript")
+-- local module = require(game.ReplicatedStorage.ModuleScript)
+```
 
--- local module = require(script.Parent.Module)
+The import function also provides a destructuring syntax that allows you to import individual members of a module.
+
+```lua
+local foo = import("./ModuleScript", { "foo" })
+-- local foo = require(script.Parent.ModuleScript).foo
+
+local foo, bar = import("./ModuleScript", { "foo", "bar" })
+-- local module = require(script.Parent.ModuleScript)
 -- local foo = module.foo
 -- local bar = module.bar
-local foo, bar = import("./Module", { "foo", "bar" })
 ```
 
-If your dataModel is set to `game` (this is true by default), children of Roblox services can be imported by starting the path with a name of a service:
+And this function isn't just for ModuleScripts! You can import any Instance with the path syntax.
 
 ```lua
--- local module = require(game:GetService("ReplicatedStorage").module)
-local module = import "ReplicatedStorage/module"
+local sound = import("./Sound")
+-- local sound = script.Parent.Sound
 
--- local module = require(game:GetService("ServerStorage").module)
-local module = import "ServerStorage/module"
+local part = import("./Part")
+-- local part = script.Parent.Part
 ```
 
-Works for any Roblox instance, so you can use this to import assets as well:
+## Aliases
+
+Aliases are a powerful method of defining custom starting points for paths.
+
+A common usecase for this is to define entrypoints to your server, client, and shared code. For example:
 
 ```lua
--- local sound = script.Parent:FindFirstChild("Sound")
-local sound = import "./Sound"
+local import = require(game.ReplicatedStorage.import)
 
--- local part = script.Parent:FindFirstChild("Part")
-local part = import "./Part"
-```
-
-### Config
-
-You can override the default dataModel of `game` with your own dataModel. This is useful if you're using Import in a library or plugin, or any other case where you don't know the exact path to scripts in your project relative to `game`.
-
-```lua
-local pluginOrLibraryRoot = script.Parent
-import.setConfig({
-	dataModel = pluginOrLibraryRoot
+import.setAliases({
+	server = game.ServerScriptService.ServerModules,
+	client = game.StarterPlayer.StarterPlayerScripts.ClientModules,
+	shared = game.ReplicatedStorage.SharedModules,
 })
 
--- local coreModule = require(script.Parent.CoreModules.Module)
-local coreModule = import "CoreModules/Module"
+local module = import("shared/ModuleScript")
+-- local module = require(game.ReplicatedStorage.SharedModules.ModuleScript)
 ```
 
-You can set aliases to define starting points for your paths:
+There is also a built-in `script` alias that allows you to import the descendants of the script that is calling `import()`.
 
 ```lua
-import.setConfig({
-	aliases = {
-		shared = game.ReplicatedStorage.Shared
-	}
-})
-
--- local module = require(game.ReplicatedStorage.Shared.Module)
-local module = import "shared/Module"
+local module = import("script/ModuleScript")
+-- local module = require(script.ModuleScript)
 ```
 
-You can also configure the module to use WaitForChild, with a configurable timeout
+## Config
+
+There are several configuration values you can customize to fit your needs.
+
+Name | Description | Default
+:-- | :-- | :--
+`root` | Controls the root Instance for absolute paths. This is especially helpful when using this module in a package or plugin | `game`
+`useWaitForChild` | By default, FindFirstChild is used when traversing the hierarchy. Set to `true` to use WaitForChild instead | false
+`waitForChildTimeout` | When `useWaitForChild` is set to `true`, this controls how long (in seconds) to yield before resolving | 1
+`scriptAlias` | Controls the name of the alias that is reserved for the current script | `"script"`
+`detectRequireLoops` | By default, `import` will throw an error when ModuleScripts attempt to require eachother in a recursive loop (which would otherwise silently fail). This feature was designed with the assumption the user only has a singular Script or LocalScript as the entry point to the codebase, and this feature can be disabled if it causes problems | true
 
 ```lua
-import.setConfig({
-	useWaitForChild = true
-	waitForChildTimeout = 1
-})
-```
+local import = require(game.ReplicatedStorage.import)
 
-You can configure the alias which you use to represent `script` in your paths.
-
-```lua
 import.setConfig({
-	currentScriptAlias = "@"
+	useWaitForChild = true,
+	scriptAlias = "@",
 })
 
--- local module = require(script.Module)
-local module = import "@/Module"
-```
-
-By default, `import` will throw an error when modulescripts attempt to import eachother in a recursive loop (which would otherwise silently fail). This feature was designed with the assumption the user only has a singular script or localscript as the entry point to the codebase, and you can disable it if the feature causes problems.
-```lua
-import.setConfig({
-	detectRequireLoops = false
-})
+local module = import("@/ModuleScript")
+-- local module = require(script:WaitForChild("ModuleScript"))
 ```
 
 ## Development
