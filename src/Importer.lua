@@ -63,6 +63,9 @@ function Importer.new(dataModel)
 
 	self._currentlyRequiring = {}
 
+	self._reloadedModules = {}
+	self._originalModules = {}
+
 	assert(IConfig(self._config))
 
     return self
@@ -91,7 +94,7 @@ function Importer:requireWithLoopDetection(module)
 	local isWaiting, startIndex = self:isWaitingForRequire(module)
 
 	-- If a require for a module hasn't completed when another module tries to
-	-- require it, we know thatit's attempting to require modules in a loop.
+	-- require it, we know that it's attempting to require modules in a loop.
 	if isWaiting then
 		local loopPath = self:buildRequireLoopPathString(startIndex, module.Name)
 		error(("Require loop! %s"):format(loopPath))
@@ -158,6 +161,8 @@ local getNextInstanceCheck = t.tuple(
 function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 	assert(getNextInstanceCheck(current, pathPart, hasAscendedParents))
 
+	current = self._originalModules[current] or current
+
 	if pathPart == self._config.currentScriptAlias then
 		return current
 	elseif pathPart == "." then
@@ -190,12 +195,39 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 	end
 end
 
+
+local bindToChangesInLocationsCheck = t.tuple(t.table, t.callback)
+function Importer:bindToChangesInLocations(locations, callback)
+	assert(bindToChangesInLocationsCheck(locations, callback))
+
+	for _, location in ipairs(locations) do
+		location.DescendantAdded:Connect(function()
+			callback()
+		end)
+		location.DescendantRemoving:Connect(function()
+			callback()
+		end)
+
+		for _, descendant in pairs(location:GetDescendants()) do
+			if descendant:IsA("ModuleScript") then
+				descendant.Changed:Connect(function(property)
+					if property == "Source" then
+						local reloadedModule = descendant:Clone()
+						self._reloadedModules[descendant] = reloadedModule
+						self._originalModules[reloadedModule] = descendant
+						callback()
+					end
+				end)
+			end
+		end
+	end
+end
+
 local importCheck = t.tuple(
 	t.instanceIsA("LuaSourceContainer"),
 	t.string,
 	t.optional(t.array(t.string))
 )
-
 function Importer:import(callingScript, path, exports)
 	assert(importCheck(callingScript, path, exports))
 
@@ -224,6 +256,8 @@ function Importer:import(callingScript, path, exports)
 		current = nextInstance
 		isFirstPart = false
 	end
+
+	current = self._reloadedModules[current] or current
 
 	if current:IsA("ModuleScript") then
 		local result

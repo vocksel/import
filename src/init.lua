@@ -5,6 +5,7 @@ local importer = Importer.new()
 
 local module = {
 	setConfig = bind(importer, importer.setConfig),
+	bindToChangesInLocations = bind(importer, importer.bindToChangesInLocations),
 }
 
 -- Allows this module to be called as import(), otherwise we'd be writing import.import()
