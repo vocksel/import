@@ -67,6 +67,17 @@ local sound = import "./Sound"
 -- local sound = script.Parent:FindFirstChild("Part")
 local part = import "./Part"
 ```
+#### Hot Reloading
+If you want to bind a callback to changes in scripts in specific locations (e.g. to reload a Roact tree), you can use the `bindToChangesInLocations` function! All descendants of these locations will be reloaded, and the callback will be fired.
+```lua
+local locations = {ReplicatedStorage.UIModules}
+
+import.bindToChangesInLocations(locations, function()
+	Roact.unmount(oldApp)
+	local newApp = Roact.mount(app())
+end)
+```
+_Note: Currently, reloaded modules are parented to `nil`, so script.Parent will not return the expected results._
 
 ### Config
 
