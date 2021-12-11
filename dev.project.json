@@ -2,17 +2,18 @@
   "name": "import",
   "tree": {
     "$className": "DataModel",
+
     "ReplicatedStorage": {
-      "$className": "ReplicatedStorage",
-      "TestEz": {
-        "$path": "lib/TestEz"
+      "DevPackages": {
+        "$path": "DevPackages"
       },
+
       "import": {
         "$path": "src"
       }
     },
+
     "ServerScriptService": {
-      "$className": "ServerScriptService",
       "spec": {
         "$path": "bin/spec.lua"
       },
