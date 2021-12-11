@@ -9,7 +9,7 @@ on:
 jobs:
   tests:
     runs-on: windows-latest
-    timeout-minutes: 4
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v2
