@@ -7,7 +7,7 @@ on:
   pull_request:
   schedule:
     # Every day at 8pm UTC (12am PST)
-    - cron: '0 20 * * *'
+    - cron: "0 20 * * *"
 
 jobs:
   style:
@@ -19,12 +19,7 @@ jobs:
       - name: Install Foreman dependencies
         uses: Roblox/setup-foreman@v1
         with:
-          version: "^1.0.1"
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Log versions
-        shell: bash
-        run: foreman list
 
       - name: Lint
         run: |
@@ -44,7 +39,6 @@ jobs:
       - name: Install toolchain
         uses: Roblox/setup-foreman@v1
         with:
-          version: "^1.0.1"
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Roblox Studio
