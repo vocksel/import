@@ -20,6 +20,9 @@ jobs:
           version: "^1.0.1"
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install dependencies
+        run: wally install
+
       - name: Install Roblox Studio
         uses: OrbitalOwen/roblox-win-installer-action@1.1
         with:
