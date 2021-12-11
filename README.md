@@ -118,6 +118,9 @@ cargo install foreman
 # Install Rojo and other tools we use
 foreman install
 
+# Install dependencies
+wally install
+
 # Serve the project. Use the Rojo plugin in Roblox Studio to connect
 rojo serve dev.project.json
 
