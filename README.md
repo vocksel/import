@@ -1,5 +1,7 @@
 # import
 
+[![CI](https://github.com/vocksel/import/actions/workflows/ci.yml/badge.svg)](https://github.com/vocksel/import/actions/workflows/ci.yml)
+
 This module allows you to write paths for Roblox instances like you do on the filesystem.
 
 Having to constantly type `script.Parent` with varying levels of `.Parent` is tedious and can produce excessively long lines. This module aims to fix this by providing a concise syntax for writing import paths that closely resembles what's used on the filesystem.
@@ -85,13 +87,13 @@ local module = import("script/ModuleScript")
 
 There are several configuration values you can customize to fit your needs.
 
-Name | Description | Default
-:-- | :-- | :--
-`root` | Controls the root Instance for absolute paths. This is especially helpful when using this module in a package or plugin | `game`
-`useWaitForChild` | By default, FindFirstChild is used when traversing the hierarchy. Set to `true` to use WaitForChild instead | false
-`waitForChildTimeout` | When `useWaitForChild` is set to `true`, this controls how long (in seconds) to yield before resolving | 1
-`scriptAlias` | Controls the name of the alias that is reserved for the current script | `"script"`
-`detectRequireLoops` | By default, `import` will throw an error when ModuleScripts attempt to require eachother in a recursive loop (which would otherwise silently fail). This feature was designed with the assumption the user only has a singular Script or LocalScript as the entry point to the codebase, and this feature can be disabled if it causes problems | true
+| Name                  | Description                                                                                                                                                                                                                                                                                                                                     | Default    |
+| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- |
+| `root`                | Controls the root Instance for absolute paths. This is especially helpful when using this module in a package or plugin                                                                                                                                                                                                                         | `game`     |
+| `useWaitForChild`     | By default, FindFirstChild is used when traversing the hierarchy. Set to `true` to use WaitForChild instead                                                                                                                                                                                                                                     | false      |
+| `waitForChildTimeout` | When `useWaitForChild` is set to `true`, this controls how long (in seconds) to yield before resolving                                                                                                                                                                                                                                          | 1          |
+| `scriptAlias`         | Controls the name of the alias that is reserved for the current script                                                                                                                                                                                                                                                                          | `"script"` |
+| `detectRequireLoops`  | By default, `import` will throw an error when ModuleScripts attempt to require eachother in a recursive loop (which would otherwise silently fail). This feature was designed with the assumption the user only has a singular Script or LocalScript as the entry point to the codebase, and this feature can be disabled if it causes problems | true       |
 
 ```lua
 local import = require(game.ReplicatedStorage.import)
