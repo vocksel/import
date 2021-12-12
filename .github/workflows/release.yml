@@ -19,6 +19,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Remove spec files
+        run: rm -rf **/*.spec.lua
+
       - name: Build
         run: rojo build -o import.rbxmx
 
