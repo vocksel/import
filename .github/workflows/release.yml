@@ -8,7 +8,7 @@ env:
   ASSET_ID: 7218303036
 
 jobs:
-  add-to-release:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
