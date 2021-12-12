@@ -1,5 +1,7 @@
 # import
 
+[![CI](https://github.com/vocksel/import/actions/workflows/ci.yml/badge.svg)](https://github.com/vocksel/import/actions/workflows/ci.yml)
+
 This module allows you to write paths for Roblox instances like you do on the filesystem.
 
 Having to constantly type `script.Parent` with varying levels of `.Parent` is tedious and can produce excessively long lines. This module aims to fix this by providing a concise syntax for writing import paths that closely resembles what's used on the filesystem.
@@ -91,7 +93,6 @@ Name | Description | Default
 `useWaitForChild` | By default, FindFirstChild is used when traversing the hierarchy. Set to `true` to use WaitForChild instead | false
 `waitForChildTimeout` | When `useWaitForChild` is set to `true`, this controls how long (in seconds) to yield before resolving | 1
 `scriptAlias` | Controls the name of the alias that is reserved for the current script | `"script"`
-
 ```lua
 local import = require(game.ReplicatedStorage.import)
 
