@@ -14,11 +14,8 @@
     },
 
     "ServerScriptService": {
-      "spec": {
-        "$path": "bin/spec.lua"
-      },
-      "run-tests": {
-        "$path": "bin/run-tests.server.lua"
+      "tests": {
+        "$path": "tests"
       }
     }
   }
