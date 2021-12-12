@@ -22,7 +22,7 @@ local aliases = Options.new({}, t.map(t.string, t.Instance))
 
 local check = t.tuple(t.string, t.optional(t.array(t.string)))
 
-local function importWithCallingScript(caller, path, exports)
+local function importWithCallingScript(caller: BaseScript, path: string, exports: ({ string })?)
 	assert(check(path, exports))
 
 	local import = createImporter(config.values.root, caller, {
@@ -40,14 +40,14 @@ end
 local api = setmetatable({
 	setConfig = config.set,
 	setAliases = aliases.set,
-	import = function(path, exports)
+	import = function(path: string, exports: ({ string })?)
 		local caller = getfenv(2).script
 		return importWithCallingScript(caller, path, exports)
 	end,
 }, {
 	-- Allows this module to be called as import(), otherwise the user has to write
 	-- import.import()
-	__call = function(_, path, exports)
+	__call = function(_, path: string, exports: ({ string })?)
 		local caller = getfenv(2).script
 		return importWithCallingScript(caller, path, exports)
 	end,

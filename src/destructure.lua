@@ -14,7 +14,7 @@
 
 local NOT_FOUND_ERROR = "Failed to destructure while importing (no export named %q found)"
 
-local function destructure(object, members)
+local function destructure(object: { [string]: any }, members: { string })
 	local result = {}
 
 	for _, memberName in ipairs(members) do
