@@ -5,8 +5,30 @@ on:
     branches:
       - main
   pull_request:
+  schedule:
+    # Every day at 8pm UTC (12am PST)
+    - cron: "0 20 * * *"
 
 jobs:
+  style:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Foreman dependencies
+        uses: Roblox/setup-foreman@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lint
+        run: |
+          selene generate-roblox-std
+          selene src/
+
+      - name: Format
+        run: stylua --check src/
+
   tests:
     runs-on: windows-latest
     timeout-minutes: 10
@@ -17,7 +39,6 @@ jobs:
       - name: Install toolchain
         uses: Roblox/setup-foreman@v1
         with:
-          version: "^1.0.1"
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
