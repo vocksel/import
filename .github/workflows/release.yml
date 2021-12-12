@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+env:
+  ASSET_ID: 7218303036
+
 jobs:
   add-to-release:
     runs-on: ubuntu-latest
@@ -25,3 +28,6 @@ jobs:
           files: import.rbxmx
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to asset library
+        run: rojo upload --asset_id ${{ env.ASSET_ID }} --cookie ${{ secrets.ROBLOSECURITY}}
