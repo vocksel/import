@@ -30,4 +30,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to asset library
-        run: rojo upload --asset_id ${{ env.ASSET_ID }} --cookie ${{ secrets.ROBLOSECURITY}}
+        run: rojo upload --asset_id ${{ env.ASSET_ID }} --cookie "${{ secrets.ROBLOSECURITY }}"
