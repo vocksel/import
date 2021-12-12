@@ -2,7 +2,7 @@ local join = require(script.Parent.join)
 
 local Options = {}
 
-function Options.new(defaults, validator)
+function Options.new(defaults: { [string]: any }, validator: (any) -> boolean)
 	local self = {}
 
 	self.values = defaults

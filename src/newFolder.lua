@@ -2,7 +2,7 @@
 	Helper function used in tests. This makes it easy to construct hierarchies
 	to test out importing in various settings.
 ]]
-local function newFolder(children)
+local function newFolder(children: { [string]: Instance }): Folder
 	local folder = Instance.new("Folder")
 	folder.Name = "root"
 

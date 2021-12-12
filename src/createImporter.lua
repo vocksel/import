@@ -2,6 +2,12 @@ local t = require(script.Parent.t)
 local createPathTraverser = require(script.Parent.createPathTraverser)
 local destructure = require(script.Parent.destructure)
 
+type Options = {
+	useWaitForChild: boolean?,
+	waitForChildTimeout: number?,
+	scriptAlias: string?,
+	aliases: ({ [string]: Instance })?,
+}
 local Options = t.strictInterface({
 	useWaitForChild = t.optional(t.boolean),
 	waitForChildTimeout = t.optional(t.number),
@@ -12,12 +18,12 @@ local Options = t.strictInterface({
 local checkOuter = t.tuple(t.Instance, t.Instance, t.optional(Options))
 local checkInner = t.tuple(t.string, t.optional(t.array(t.string)))
 
-local function createImporter(root, start, options)
+local function createImporter(root: Instance, start: Instance, options: Options)
 	assert(checkOuter(root, start, options))
 
 	options = options or {}
 
-	return function(path, exports)
+	return function(path: string, exports: ({ string })?)
 		assert(checkInner(path, exports))
 
 		-- This condition is true when the user calls `import("script")`. In
