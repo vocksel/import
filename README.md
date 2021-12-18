@@ -2,13 +2,27 @@
 
 [![CI](https://github.com/vocksel/import/actions/workflows/ci.yml/badge.svg)](https://github.com/vocksel/import/actions/workflows/ci.yml)
 
-This module allows you to write paths for Roblox instances like you do on the filesystem.
+This package allows you to write paths for Roblox instances like you do on the filesystem. It comes with support for aliases, individual exports, and works for any instance.
+## Installation
 
-Having to constantly type `script.Parent` with varying levels of `.Parent` is tedious and can produce excessively long lines. This module aims to fix this by providing a concise syntax for writing import paths that closely resembles what's used on the filesystem.
+### Wally
 
-## Download
+If you are using [Wally](https://github.com/UpliftGames/wally), add the following to your `wally.toml` and run `wally install` to get a copy of the package.
 
-Download the latest version from the [releases page](https://github.com/vocksel/import/releases) or from the [asset library](https://www.roblox.com/library/7218303036/import)
+```
+[dependencies]
+import = "vocksel/import@v2.0.0
+```
+
+### Model File
+
+Download the latest release from the [asset library](https://www.roblox.com/library/7218303036/import).
+
+## Motivation
+
+Having to type `script.Parent` with varying levels of `.Parent` is tedious and can produce excessively long require statements. 
+
+This module aims to fix that by providing a concise syntax for writing import paths that closely resembles what is used on the filesystem.
 
 ## Usage
 
