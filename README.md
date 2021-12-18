@@ -85,7 +85,11 @@ import.setAliases({
 	client = game.StarterPlayer.StarterPlayerScripts.ClientModules,
 	shared = game.ReplicatedStorage.SharedModules,
 })
+```
 
+You can then use these aliases as keywords at the beginning of your paths:
+
+```lua
 local module = import("shared/ModuleScript")
 -- local module = require(game.ReplicatedStorage.SharedModules.ModuleScript)
 ```
