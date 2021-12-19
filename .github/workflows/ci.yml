@@ -4,13 +4,17 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
   pull_request:
+    paths-ignore:
+      - '**.md'
   schedule:
     # Every day at 8pm UTC (12am PST)
     - cron: "0 20 * * *"
 
 jobs:
-  style:
+  code-quality:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -44,14 +48,14 @@ jobs:
       - name: Install dependencies
         run: wally install
 
+      - name: Build place file
+        run: rojo build dev.project.json -o studio-tests.rbxlx
+
       - name: Install Roblox Studio
         uses: OrbitalOwen/roblox-win-installer-action@1.1
         with:
           cookie: ${{ secrets.ROBLOSECURITY }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build place file
-        run: rojo build dev.project.json -o import.rbxlx
-
       - name: Run tests
-        run: run-in-roblox --place import.rbxlx --script tests/spec.lua
+        run: run-in-roblox --place studio-tests.rbxlx --script tests/init.server.lua
