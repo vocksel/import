@@ -11,5 +11,5 @@ exclude = [
 	"src/mocks",
 ]
 
-[dev-dependencies]
+[dependencies]
 TestEZ = "roblox/testez@0.4.1"
