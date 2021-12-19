@@ -11,7 +11,7 @@ If you are using [Wally](https://github.com/UpliftGames/wally), add the followin
 
 ```
 [dependencies]
-import = "vocksel/import@v2.0.0
+import = "vocksel/import@2.0.1
 ```
 
 ### Model File
