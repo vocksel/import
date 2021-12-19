@@ -1,7 +1,7 @@
 [package]
 name = "vocksel/import"
 description = "Import modules with paths like the filesystem"
-version = "2.0.0"
+version = "2.0.1"
 authors = [ "David Minnerly <me@vocksel.com>" ]
 license = "MIT"
 registry = "https://github.com/UpliftGames/wally-index"
@@ -11,5 +11,5 @@ exclude = [
 	"src/mocks",
 ]
 
-[dev-dependencies]
+[dependencies]
 TestEZ = "roblox/testez@0.4.1"

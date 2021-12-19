@@ -2,17 +2,14 @@
   "name": "import",
   "tree": {
     "$className": "DataModel",
-
     "ReplicatedStorage": {
-      "DevPackages": {
-        "$path": "DevPackages"
-      },
-
-      "import": {
-        "$path": "src"
+      "Packages": {
+        "$path": "Packages",
+        "import": {
+          "$path": "src"
+        }
       }
     },
-
     "ServerScriptService": {
       "tests": {
         "$path": "tests"
