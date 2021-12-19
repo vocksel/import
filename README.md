@@ -123,29 +123,10 @@ local module = import("@/ModuleScript")
 -- local module = require(script:WaitForChild("ModuleScript"))
 ```
 
-## Development
+## Contributing
 
-You will need [Rust](https://www.rust-lang.org/) 1.41.0+ and the [Rojo plugin](https://www.roblox.com/library/4048317704/Rojo-6). If you use VS Code, you can install the [Rojo extension](https://marketplace.visualstudio.com/items?itemName=evaera.vscode-rojo) which manages the plugin for you and makes it easier to serve the project.
-
-It is also recommended that you add `~/.foreman/bin` to your `PATH` to make the tools that Foreman installs for you accessible on your system.
-
-```sh
-# Cargo is Rust's package manager, Foreman is our toolchain manager
-cargo install foreman
-
-# Install Rojo and other tools we use
-foreman install
-
-# Install dependencies
-wally install
-
-# Serve the project. Use the Rojo plugin in Roblox Studio to connect
-rojo serve dev.project.json
-
-# Or build the project. Drag and drop into Roblox Studio to insert it
-rojo build -o import.rbxmx
-```
+See the [contributing guide](CONTRIBUTING.md).
 
 ## License
 
-MIT
+[MIT License](LICENSE)
