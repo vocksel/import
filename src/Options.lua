@@ -1,4 +1,4 @@
-local join = require(script.Parent.join)
+local Llama = require(script.Parent.Parent.Llama)
 
 local Options = {}
 
@@ -12,7 +12,7 @@ function Options.new(defaults: { [string]: any }, validator: (any) -> boolean)
 			assert(validator(options))
 		end
 
-		local newValues = join(self.values, options)
+		local newValues = Llama.Dictionary.join(self.values, options)
 
 		self.values = newValues
 

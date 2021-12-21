@@ -1,6 +1,6 @@
 return function()
 	local Options = require(script.Parent.Options)
-	local t = require(script.Parent.t)
+	local t = require(script.Parent.Parent.t)
 
 	describe("get", function()
 		it("should return the options object", function()

@@ -1,5 +1,5 @@
-local t = require(script.t)
-local join = require(script.join)
+local t = require(script.Parent.t)
+local Llama = require(script.Parent.Llama)
 local createImporter = require(script.createImporter)
 local Options = require(script.Options)
 local getCallingScript = require(script.getCallingScript)
@@ -28,7 +28,7 @@ local function import(path: string, exports: ({ string })?): Instance?
 		useWaitForChild = config.values.useWaitForChild,
 		waitForChildTimeout = config.values.waitForChildTimeout,
 		scriptAlias = config.values.scriptAlias,
-		aliases = join(aliases.values, {
+		aliases = Llama.Dictionary.join(aliases.values, {
 			[config.values.scriptAlias] = caller,
 		}),
 	})
