@@ -17,7 +17,7 @@ local function getCallingScript(module: ModuleScript, useFallback: boolean?): Lu
 			-- nextCaller can be nil if callerPath is outside the DataModel.
 			-- This can happen when an unparented LuaSourceContainer attempts to
 			-- import something. In this case, we break out of the loop and call
-			-- this function with the useFallback flag enabled.
+			-- getCallingScript() with the useFallback flag.
 			nextCaller = getInstanceFromFullName(callerPath)
 		end
 
