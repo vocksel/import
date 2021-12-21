@@ -1,4 +1,4 @@
-local t = require(script.t)
+local t = require(script.Parent.t)
 local join = require(script.join)
 local createImporter = require(script.createImporter)
 local Options = require(script.Options)

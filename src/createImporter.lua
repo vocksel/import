@@ -1,4 +1,4 @@
-local t = require(script.Parent.t)
+local t = require(script.Parent.Parent.t)
 local createPathTraverser = require(script.Parent.createPathTraverser)
 local destructure = require(script.Parent.destructure)
 
