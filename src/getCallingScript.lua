@@ -26,6 +26,8 @@ local function getCallingScript(module: ModuleScript, useFallback: boolean?): Lu
 		end
 
 		if nextCaller == module then
+			-- Once the module that was passed in has been found, we just need
+			-- to loop one more time to find the caller.
 			foundModule = true
 		else
 			if foundModule then
