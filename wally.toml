@@ -9,6 +9,7 @@ realm = "shared"
 exclude = [
 	"*.spec.lua",
 	"src/mocks",
+	"src/newFolder.lua",
 ]
 
 [dependencies]
