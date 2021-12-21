@@ -18,6 +18,9 @@ local function getInstanceFromFullName(fullName: string): Instance?
 		return game:GetService(serviceName)
 	end)
 
+	-- This function only works for instances in the DataModel. As such, the
+	-- first part of the path will always be a service. If we cannot get a
+	-- service from the first part of the path, simply return nil
 	if not (success and current) then
 		return nil
 	end
