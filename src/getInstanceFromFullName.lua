@@ -26,12 +26,12 @@ local function getInstanceFromFullName(fullName: string): Instance?
 		-- Keep around a copy of the `parts` array. We are going to concat this
 		-- into new paths, and incrementally remove from the right to narrow
 		-- down the file path.
+		local tempParts = Llama.List.copy(parts)
 
 		-- The result of GetFullName() uses dots to separate paths, but we also
 		-- use dots in our file names (e.g. with spec and story files). As such,
 		-- this block will look ahead to see if multiple parts are actually a
 		-- single filename.
-		local tempParts = Llama.List.copy(parts)
 		for _ = 1, #tempParts do
 			local name = table.concat(tempParts, PATH_SEPERATOR)
 			local found = current:FindFirstChild(name)
