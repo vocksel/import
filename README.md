@@ -11,7 +11,7 @@ If you are using [Wally](https://github.com/UpliftGames/wally), add the followin
 
 ```
 [dependencies]
-import = "vocksel/import@2.0.1
+import = "vocksel/import@2.1.0
 ```
 
 ### Model File
@@ -20,7 +20,7 @@ Download the latest release from the [asset library](https://www.roblox.com/libr
 
 ## Motivation
 
-Having to type `script.Parent` with varying levels of `.Parent` is tedious and can produce excessively long require statements. 
+Having to type `script.Parent` with varying levels of `.Parent` is tedious and can produce excessively long require statements.
 
 This module aims to fix that by providing a concise syntax for writing import paths that closely resembles what is used on the filesystem.
 
