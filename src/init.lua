@@ -2,6 +2,7 @@ local t = require(script.Parent.t)
 local Llama = require(script.Parent.Llama)
 local createImporter = require(script.createImporter)
 local Options = require(script.Options)
+local getCallingScript = require(script.getCallingScript)
 
 local config = Options.new(
 	{
@@ -20,12 +21,10 @@ local config = Options.new(
 
 local aliases = Options.new({}, t.map(t.string, t.Instance))
 
-local check = t.tuple(t.string, t.optional(t.array(t.string)))
+local function import(path: string, exports: ({ string })?): Instance?
+	local caller = getCallingScript(script)
 
-local function importWithCallingScript(caller: BaseScript, path: string, exports: ({ string })?)
-	assert(check(path, exports))
-
-	local import = createImporter(config.values.root, caller, {
+	local importImpl = createImporter(config.values.root, caller, {
 		useWaitForChild = config.values.useWaitForChild,
 		waitForChildTimeout = config.values.waitForChildTimeout,
 		scriptAlias = config.values.scriptAlias,
@@ -34,22 +33,18 @@ local function importWithCallingScript(caller: BaseScript, path: string, exports
 		}),
 	})
 
-	return import(path, exports)
+	return importImpl(path, exports)
 end
 
 local api = setmetatable({
 	setConfig = config.set,
 	setAliases = aliases.set,
-	import = function(path: string, exports: ({ string })?)
-		local caller = getfenv(2).script
-		return importWithCallingScript(caller, path, exports)
-	end,
+	import = import,
 }, {
 	-- Allows this module to be called as import(), otherwise the user has to write
 	-- import.import()
-	__call = function(_, path: string, exports: ({ string })?)
-		local caller = getfenv(2).script
-		return importWithCallingScript(caller, path, exports)
+	__call = function(_self, ...)
+		return import(...)
 	end,
 })
 

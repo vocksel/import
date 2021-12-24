@@ -16,3 +16,4 @@ exclude = [
 t = "osyrisrblx/t@3.0.0"
 Llama = "freddylist/llama@1.1.1"
 TestEZ = "roblox/testez@0.4.1"
+Llama = "freddylist/llama@1.1.1"
