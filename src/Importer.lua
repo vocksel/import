@@ -244,30 +244,24 @@ local bindToChangesInLocationsCheck = t.tuple(t.table, t.callback)
 function Importer:bindToChangesInLocations(locations, callback)
 	assert(bindToChangesInLocationsCheck(locations, callback))
 
+	local function resetReloadedModulesAndFireCallback()
+		self._hasReloaded = true
+		self._reloadedModules = {}
+		self._originalModules = {}
+		callback()
+	end
+
 	for _, location in ipairs(locations) do
 		table.insert(self._reloadLocations, location)
 
-		location.DescendantAdded:Connect(function()
-			self._hasReloaded = true
-			self._reloadedModules = {}
-			self._originalModules = {}
-			callback()
-		end)
-		location.DescendantRemoving:Connect(function()
-			self._hasReloaded = true
-			self._reloadedModules = {}
-			self._originalModules = {}
-			callback()
-		end)
+		location.DescendantAdded:Connect(resetReloadedModulesAndFireCallback)
+		location.DescendantRemoving:Connect(resetReloadedModulesAndFireCallback)
 
 		for _, descendant in pairs(location:GetDescendants()) do
 			if descendant:IsA("ModuleScript") then
 				descendant.Changed:Connect(function(property)
 					if property == "Source" then
-						self._hasReloaded = true
-						self._reloadedModules = {}
-						self._originalModules = {}
-						callback()
+						resetReloadedModulesAndFireCallback()
 					end
 				end)
 			end
@@ -277,6 +271,7 @@ end
 
 local function isDescendantOfAnyAncestors(instance, potentialAncestors)
 	for _, ancestor in ipairs(potentialAncestors) do
+		-- Return true if instance itself is an ancestor, so that locations which are scripts can be reloaded.
 		if instance:IsDescendantOf(ancestor) or instance == ancestor then
 			return true
 		end
