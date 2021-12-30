@@ -306,15 +306,8 @@ function Importer:import(callingScript, path, exports)
 				),
 				3
 			)
-		elseif not nextInstance then
-			error(
-				string.format(
-					"'%s' is not the name of a service, alias, or child of current dataModel (%s)",
-					pathPart,
-					current:GetFullName()
-				),
-				3
-			)
+		else
+			error(string.format("Could not find a child '%s' in \"%s\"", pathPart, current:GetFullName()), 3)
 		end
 		-- This makes sure that `../` will take you up into the parent of the
 		-- script (script.Parent.Parent), but `../../` will only take you up
