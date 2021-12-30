@@ -10,6 +10,40 @@ local IConfig = t.strictInterface({
 	dataModel = t.Instance,
 })
 
+local function prettyPcall(callback, ...)
+	local error, traceback
+	local function xpcallInternalErrHandler(internalError)
+		-- xpcall error handler can only return one value out from the call, so
+		-- we use upvalues to pass the error and traceback out of the xpcall
+		-- without lots of ugly overcomplicated packing and unpacking.
+		error = internalError
+		traceback = debug.traceback(nil, 2) or "nil"
+	end
+
+	local results = table.pack(xpcall(callback, xpcallInternalErrHandler, ...))
+
+	if results[1] == false then
+		return false, error, traceback
+	else
+		return true, table.unpack(results, 2, results.n)
+	end
+end
+
+function wrapInCurlies(str)
+	if str:find("\n") ~= nil then
+		str = str:gsub("\n", "\n  ") -- Indent every newline by 2 spaces
+		return string.format("{\n  %s\n}", str) -- Wrap indented text block in curly brackets
+	else
+		return string.format("{ %s }", str)
+	end
+end
+
+function formatError(err, traceback)
+	return wrapInCurlies(
+		string.format("Error: %s\nTraceback: %s", wrapInCurlies(tostring(err)), wrapInCurlies(traceback))
+	)
+end
+
 --[[
 	Allows exporting individual members of a module.
 
@@ -21,12 +55,14 @@ local IConfig = t.strictInterface({
 		-- foo.server.lua
 		local foo = getExports(module, { "foo" })
 ]]
-local function getExports(moduleResult, exports,  moduleFullName)
+local function getExports(moduleResult, exports, moduleFullName)
 	local tuple = {}
 
 	for _, name in ipairs(exports) do
 		local export = moduleResult[name]
-		assert(export, ("%s has no export named %s"):format(moduleFullName, name))
+		if not export then
+			error(string.format("'%s' has no export named '%s'", moduleFullName, name), 4)
+		end
 		table.insert(tuple, export)
 	end
 
@@ -49,8 +85,8 @@ local Importer = {}
 Importer.__index = Importer
 
 function Importer.new(dataModel)
-    local self = {}
-    setmetatable(self, Importer)
+	local self = {}
+	setmetatable(self, Importer)
 
 	self._config = {
 		aliases = {},
@@ -63,12 +99,14 @@ function Importer.new(dataModel)
 
 	self._currentlyRequiring = {}
 
+	self._hasReloaded = false
 	self._reloadedModules = {}
 	self._originalModules = {}
+	self._reloadLocations = {}
 
 	assert(IConfig(self._config))
 
-    return self
+	return self
 end
 
 function Importer:isWaitingForRequire(module)
@@ -81,7 +119,7 @@ end
 
 function Importer:buildRequireLoopPathString(startIndex, moduleName)
 	local recursionPathStr = moduleName
-	for i = startIndex+1, #self._currentlyRequiring do
+	for i = startIndex + 1, #self._currentlyRequiring do
 		local module = self._currentlyRequiring[i]
 		recursionPathStr = recursionPathStr .. " - > " .. module.Name
 	end
@@ -97,7 +135,7 @@ function Importer:requireWithLoopDetection(module)
 	-- require it, we know that it's attempting to require modules in a loop.
 	if isWaiting then
 		local loopPath = self:buildRequireLoopPathString(startIndex, module.Name)
-		error(("Require loop! %s"):format(loopPath))
+		error(("Require loop! %s"):format(loopPath), 4)
 	end
 
 	-- Add the module we're attempting to require to the list of modules being
@@ -105,13 +143,21 @@ function Importer:requireWithLoopDetection(module)
 	table.insert(self._currentlyRequiring, module)
 
 	-- Because requiring a module runs all the code in the module first before
-	-- returning, any import calls that modulevau makes will run before require
+	-- returning, any import calls that module makes will run before require
 	-- actually returns. Because of this, by adding the module to the list of
 	-- requiring modules, we can build out a chain of dependencies. Once the
 	-- deepest modules are required, the rcursion completes, and all the modules
 	-- return their values, at which point we remove them from the currently
 	-- requiring table.
-	local result = require(module)
+	local result
+
+	local success, errorMsg, traceback = prettyPcall(function()
+		result = require(module)
+	end)
+
+	if not success then
+		error(string.format("Module '%s' errored on require: \n%s", module.Name, formatError(errorMsg, traceback)), 4)
+	end
 
 	-- Once the module has been required, we can remove it from the list of modules being required.
 	for i = #self._currentlyRequiring, 1, -1 do
@@ -123,7 +169,6 @@ function Importer:requireWithLoopDetection(module)
 
 	return result
 end
-
 
 function Importer:setConfig(newValues)
 	local newConfig = Cryo.Dictionary.join(self._config, newValues)
@@ -153,11 +198,7 @@ end
 	only expect to go up one more parent.
 ]]
 
-local getNextInstanceCheck = t.tuple(
-	t.Instance,
-	t.string,
-	t.boolean
-)
+local getNextInstanceCheck = t.tuple(t.Instance, t.string, t.boolean)
 function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 	assert(getNextInstanceCheck(current, pathPart, hasAscendedParents))
 
@@ -180,7 +221,11 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 
 			if alias then
 				if isService then
-					warn(("Import: Alias '%s' is also defined as a Roblox service. Using alias instead."):format(pathPart))
+					warn(
+						("Import: Alias '%s' is also defined as a Roblox service. Using alias instead."):format(
+							pathPart
+						)
+					)
 				end
 
 				return alias
@@ -195,16 +240,23 @@ function Importer:getNextInstance(current, pathPart, hasAscendedParents, isFirst
 	end
 end
 
-
 local bindToChangesInLocationsCheck = t.tuple(t.table, t.callback)
 function Importer:bindToChangesInLocations(locations, callback)
 	assert(bindToChangesInLocationsCheck(locations, callback))
 
 	for _, location in ipairs(locations) do
+		table.insert(self._reloadLocations, location)
+
 		location.DescendantAdded:Connect(function()
+			self._hasReloaded = true
+			self._reloadedModules = {}
+			self._originalModules = {}
 			callback()
 		end)
 		location.DescendantRemoving:Connect(function()
+			self._hasReloaded = true
+			self._reloadedModules = {}
+			self._originalModules = {}
 			callback()
 		end)
 
@@ -212,9 +264,9 @@ function Importer:bindToChangesInLocations(locations, callback)
 			if descendant:IsA("ModuleScript") then
 				descendant.Changed:Connect(function(property)
 					if property == "Source" then
-						local reloadedModule = descendant:Clone()
-						self._reloadedModules[descendant] = reloadedModule
-						self._originalModules[reloadedModule] = descendant
+						self._hasReloaded = true
+						self._reloadedModules = {}
+						self._originalModules = {}
 						callback()
 					end
 				end)
@@ -223,11 +275,17 @@ function Importer:bindToChangesInLocations(locations, callback)
 	end
 end
 
-local importCheck = t.tuple(
-	t.instanceIsA("LuaSourceContainer"),
-	t.string,
-	t.optional(t.array(t.string))
-)
+local function isDescendantOfAnyAncestors(instance, potentialAncestors)
+	for _, ancestor in ipairs(potentialAncestors) do
+		if instance:IsDescendantOf(ancestor) or instance == ancestor then
+			return true
+		end
+	end
+
+	return false
+end
+
+local importCheck = t.tuple(t.instanceIsA("LuaSourceContainer"), t.string, t.optional(t.array(t.string)))
 function Importer:import(callingScript, path, exports)
 	assert(importCheck(callingScript, path, exports))
 
@@ -239,12 +297,24 @@ function Importer:import(callingScript, path, exports)
 	for _, pathPart in pairs(parts) do
 		local nextInstance = self:getNextInstance(current, pathPart, hasAscendedParents, isFirstPart)
 
-		if isFirstPart then
-			assert(nextInstance, ("'%s' is not the name of a service, alias, or child of current dataModel (%s)")
-				:format(pathPart, self._config.dataModel.Name))
-		else
-			assert(nextInstance, ("Could not find a child '%s' in \"%s\"")
-				:format(pathPart, current:GetFullName(), pathPart))
+		if isFirstPart and not nextInstance then
+			error(
+				string.format(
+					"'%s' is not the name of a service, alias, or child of current dataModel (%s)",
+					pathPart,
+					self._config.dataModel.Name
+				),
+				3
+			)
+		elseif not nextInstance then
+			error(
+				string.format(
+					"'%s' is not the name of a service, alias, or child of current dataModel (%s)",
+					pathPart,
+					current:GetFullName()
+				),
+				3
+			)
 		end
 		-- This makes sure that `../` will take you up into the parent of the
 		-- script (script.Parent.Parent), but `../../` will only take you up
@@ -257,7 +327,15 @@ function Importer:import(callingScript, path, exports)
 		isFirstPart = false
 	end
 
-	current = self._reloadedModules[current] or current
+	if self._hasReloaded and isDescendantOfAnyAncestors(current, self._reloadLocations) then
+		if not self._reloadedModules[current] then
+			local clone = current:Clone()
+			self._reloadedModules[current] = clone
+			self._originalModules[clone] = current
+		end
+
+		current = self._reloadedModules[current]
+	end
 
 	if current:IsA("ModuleScript") then
 		local result
