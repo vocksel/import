@@ -7,14 +7,12 @@ on:
   pull_request:
 
 jobs:
-  code-quality:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Install Foreman dependencies
-        uses: Roblox/setup-foreman@v1
+      - uses: Roblox/setup-foreman@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -25,6 +23,12 @@ jobs:
 
       - name: Format
         run: stylua --check src/
+
+      - name: Install dependencies
+        run: wally install
+
+      - name: Build
+        run: rojo build -o build.rbxm
 
   analyze:
     runs-on: ubuntu-latest
