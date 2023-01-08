@@ -1,6 +1,10 @@
 return function()
+	local StarterPlayer = game:GetService("StarterPlayer")
+
+	local Root = script:FindFirstAncestor("import")
+
+	local newFolder = require(Root.newFolder)
 	local createPathTraverser = require(script.Parent.createPathTraverser)
-	local newFolder = require(script.Parent.newFolder)
 
 	it("should find instances one level up (script.Parent)", function()
 		local start = Instance.new("Script")
@@ -101,7 +105,9 @@ return function()
 
 		local traverse = createPathTraverser(game, start)
 
-		expect(traverse("/StarterPlayer/StarterPlayerScripts")).to.equal(game.StarterPlayer.StarterPlayerScripts)
+		expect(traverse("/StarterPlayer/StarterPlayerScripts")).to.equal(
+			StarterPlayer:FindFirstChild("StarterPlayerScripts")
+		)
 	end)
 
 	it("should throw when going past the root", function()
@@ -136,7 +142,7 @@ return function()
 	it("should support aliases", function()
 		local start = Instance.new("Script")
 
-		local tree = newFolder({
+		local tree: any = newFolder({
 			ReplicatedStorage = newFolder({
 				sharedModule = Instance.new("ModuleScript"),
 			}),

@@ -1,6 +1,7 @@
 # Rojo
 /*.rbxl*
 /*.rbxm*
+/sourcemap.json
 
 # Selene
 roblox.toml

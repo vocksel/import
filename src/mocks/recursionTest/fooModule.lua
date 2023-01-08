@@ -1,4 +1,6 @@
-local import = require(script.Parent.Parent.Parent)
+local Root = script:FindFirstAncestor("import")
+
+local import = require(Root)
 import("./barModule")
 
 return {}

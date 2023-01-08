@@ -1,4 +1,6 @@
-local getInstanceFromFullName = require(script.Parent.getInstanceFromFullName)
+local Root = script:FindFirstAncestor("import")
+
+local getInstanceFromFullName = require(Root.getInstanceFromFullName)
 
 local function getCallingScript(module: ModuleScript, useFallback: boolean?): LuaSourceContainer
 	local level = 1
@@ -14,11 +16,15 @@ local function getCallingScript(module: ModuleScript, useFallback: boolean?): Lu
 		else
 			local callerPath = debug.info(level, "s")
 
-			-- nextCaller can be nil if callerPath is outside the DataModel.
+			-- This value can be nil if `callerPath` is outside the DataModel.
 			-- This can happen when an unparented LuaSourceContainer attempts to
-			-- import something. In this case, we break out of the loop and call
-			-- getCallingScript() with the useFallback flag.
-			nextCaller = getInstanceFromFullName(callerPath)
+			-- import something, so in this case we break out of the loop and
+			-- call getCallingScript() with the useFallback flag down below.
+			local instance = getInstanceFromFullName(callerPath)
+
+			if instance and instance:IsA("LuaSourceContainer") then
+				nextCaller = instance
+			end
 		end
 
 		if not nextCaller then
@@ -31,7 +37,9 @@ local function getCallingScript(module: ModuleScript, useFallback: boolean?): Lu
 			foundModule = true
 		else
 			if foundModule then
-				return nextCaller
+				-- If `foundModule` is true then `nextCaller` is non-nil so we
+				-- cast to LuaSourceContainer to clear the nil typing
+				return nextCaller :: LuaSourceContainer
 			end
 		end
 
