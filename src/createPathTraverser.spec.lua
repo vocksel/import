@@ -106,7 +106,7 @@ return function()
 		local traverse = createPathTraverser(game, start)
 
 		expect(traverse("/StarterPlayer/StarterPlayerScripts")).to.equal(
-			StarterPlayer:FindFirstChild("StarterPlayerScriptsname")
+			StarterPlayer:FindFirstChild("StarterPlayerScripts")
 		)
 	end)
 
