@@ -1,0 +1,11 @@
+{
+  "name": "import",
+  "tree": {
+    "Packages": {
+      "$path": "Packages",
+      "import": {
+        "$path": "src"
+      }
+    }
+  }
+}

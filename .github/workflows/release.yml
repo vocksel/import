@@ -25,7 +25,7 @@ jobs:
         run: wally install
 
       - name: Build
-        run: rojo build -o ${{ env.OUTPUT_NAME }}
+        run: rojo build package.project.json -o ${{ env.OUTPUT_NAME }}
 
       - uses: softprops/action-gh-release@v1
         if: ${{ github.event.release }}
