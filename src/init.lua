@@ -1,7 +1,7 @@
 local Root = script
 
 local t = require(Root.Parent.t)
-local Llama = require(Root.Parent.Llama)
+local Sift = require(Root.Parent.Sift)
 local createImporter = require(Root.createImporter)
 local Options = require(Root.Options)
 local getCallingScript = require(Root.getCallingScript)
@@ -30,7 +30,7 @@ local function import(path: string, exports: ({ string })?): Instance?
 		useWaitForChild = config.values.useWaitForChild,
 		waitForChildTimeout = config.values.waitForChildTimeout,
 		scriptAlias = config.values.scriptAlias,
-		aliases = Llama.Dictionary.join(aliases.values, {
+		aliases = Sift.Dictionary.merge(aliases.values, {
 			[config.values.scriptAlias] = caller,
 		}),
 	})

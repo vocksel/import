@@ -1,6 +1,6 @@
 local Root = script:FindFirstAncestor("import")
 
-local Llama = require(Root.Parent.Llama)
+local Sift = require(Root.Parent.Sift)
 
 local Options = {}
 
@@ -16,7 +16,7 @@ function Options.new(defaults: { [string]: any }, validator: Validator?)
 			assert(validator(options))
 		end
 
-		local newValues = Llama.Dictionary.join(self.values, options)
+		local newValues = Sift.Dictionary.merge(self.values, options)
 
 		self.values = newValues
 
