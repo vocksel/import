@@ -20,12 +20,10 @@ local Options = t.strictInterface({
 local checkOuter = t.tuple(t.Instance, t.Instance, t.optional(Options))
 local checkInner = t.tuple(t.string, t.optional(t.array(t.string)))
 
-local function createImporter(root: Instance, start: Instance, options: Options)
+local function createImporter(root: Instance, start: Instance, options: Options?)
 	assert(checkOuter(root, start, options))
 
-	options = options or {}
-
-	return function(path: string, exports: ({ string })?)
+	return function(path: string, exports: { string }?): Instance?
 		assert(checkInner(path, exports))
 
 		-- This condition is true when the user calls `import("script")`. In
@@ -33,13 +31,14 @@ local function createImporter(root: Instance, start: Instance, options: Options)
 		-- the import function was called from. Without this, the calling script
 		-- gets required if it is a ModuleScript. It does not make sense for a
 		-- module to require itself, so instead we return the instance.
-		if path == options.scriptAlias then
+		if options and path == options.scriptAlias then
 			return start
 		end
 
 		-- TODO: Pass in the full `options` table and implement useWaitForChild
 		-- and waitForChildTimeout
-		local traverse = createPathTraverser(root, start, options.aliases)
+		local aliases = if options then options.aliases else nil
+		local traverse = createPathTraverser(root, start, aliases)
 		local instance = traverse(path)
 
 		if instance then
@@ -54,6 +53,8 @@ local function createImporter(root: Instance, start: Instance, options: Options)
 			else
 				return instance
 			end
+		else
+			return nil
 		end
 	end
 end

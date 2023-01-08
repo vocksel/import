@@ -4,7 +4,9 @@ local Llama = require(Root.Parent.Llama)
 
 local Options = {}
 
-function Options.new(defaults: { [string]: any }, validator: (any) -> boolean)
+type Validator = (value: any) -> (boolean, string?)
+
+function Options.new(defaults: { [string]: any }, validator: Validator?)
 	local self = {}
 
 	self.values = defaults

@@ -3,12 +3,10 @@ local splitPath = require(script.Parent.splitPath)
 local COULD_NOT_RESOLVE_PATH = "'%s' is not the name of a service, alias, or child of current dataModel"
 local COULD_NOT_FIND_CHILD = "could not resolve a child %q in %q"
 
-local function createPathTraverser(root: Instance, start: Instance, aliases: table)
+local function createPathTraverser(root: Instance, start: Instance, aliases: { [string]: Instance }?)
 	-- This is used to ensure `../` will move upwards to script.Parent.Parent,
 	-- but `../../` will only move up one parent after that.
 	local hasAscended = false
-
-	aliases = aliases or {}
 
 	return function(path)
 		if path == "/" then
@@ -25,7 +23,10 @@ local function createPathTraverser(root: Instance, start: Instance, aliases: tab
 			-- where we look for aliases, or whether the path is relative or
 			-- absolute.
 			if index == 1 then
-				local alias = aliases[pathPart]
+				local alias: Instance
+				if aliases then
+					alias = aliases[pathPart]
+				end
 
 				if pathPart == root then
 					current = root

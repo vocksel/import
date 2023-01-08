@@ -1,4 +1,6 @@
 return function()
+	local ServerStorage = game:GetService("ServerStorage")
+
 	local import = require(script.Parent)
 
 	describe("import", function()
@@ -52,10 +54,10 @@ return function()
 	describe("setAliases", function()
 		it("should add aliases for import() to use", function()
 			import.setAliases({
-				server = game.ServerStorage,
+				server = ServerStorage,
 			})
 
-			expect(import("server")).to.equal(game.ServerStorage)
+			expect(import("server")).to.equal(ServerStorage)
 
 			-- Reset so other tests are uneffected
 			import.setAliases({})

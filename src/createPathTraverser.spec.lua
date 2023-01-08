@@ -1,4 +1,6 @@
 return function()
+	local StarterPlayer = game:GetService("StarterPlayer")
+
 	local Root = script:FindFirstAncestor("import")
 
 	local newFolder = require(Root.newFolder)
@@ -103,7 +105,7 @@ return function()
 
 		local traverse = createPathTraverser(game, start)
 
-		expect(traverse("/StarterPlayer/StarterPlayerScripts")).to.equal(game.StarterPlayer.StarterPlayerScripts)
+		expect(traverse("/StarterPlayer/StarterPlayerScripts")).to.equal(StarterPlayer.StarterPlayerScripts)
 	end)
 
 	it("should throw when going past the root", function()

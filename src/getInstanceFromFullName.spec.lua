@@ -6,7 +6,7 @@ return function()
 	local newFolder = require(Root.newFolder)
 	local getInstanceFromFullName = require(script.Parent.getInstanceFromFullName)
 
-	local folder: Folder?
+	local folder: Folder
 
 	afterEach(function()
 		if folder then
@@ -16,7 +16,7 @@ return function()
 
 	it("should get services", function()
 		local path = getInstanceFromFullName("ReplicatedStorage")
-		expect(path).to.equal(game.ReplicatedStorage)
+		expect(path).to.equal(ReplicatedStorage)
 	end)
 
 	it("should work on nested instances", function()

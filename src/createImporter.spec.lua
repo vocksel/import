@@ -8,15 +8,15 @@ return function()
 
 	it("should error for invalid argument types", function()
 		expect(function()
-			createImporter("bad", Instance.new("Folder"))
+			(createImporter :: any)("bad", Instance.new("Folder"))
 		end).to.throw()
 
 		expect(function()
-			createImporter(Instance.new("Folder"), "bad")
+			(createImporter :: any)(Instance.new("Folder"), "bad")
 		end).to.throw()
 
 		expect(function()
-			createImporter()
+			(createImporter :: any)()
 		end).to.throw()
 	end)
 
