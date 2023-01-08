@@ -6,7 +6,9 @@
 	Returns nil if the instance is outside the DataModel.
 ]]
 
-local Llama = require(script.Parent.Parent.Llama)
+local Root = script:FindFirstAncestor("import")
+
+local Llama = require(Root.Parent.Llama)
 
 local PATH_SEPERATOR = "."
 

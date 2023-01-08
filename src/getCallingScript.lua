@@ -1,4 +1,6 @@
-local getInstanceFromFullName = require(script.Parent.getInstanceFromFullName)
+local Root = script:FindFirstAncestor("import")
+
+local getInstanceFromFullName = require(Root.getInstanceFromFullName)
 
 local function getCallingScript(module: ModuleScript, useFallback: boolean?): LuaSourceContainer
 	local level = 1

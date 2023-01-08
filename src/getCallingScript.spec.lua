@@ -1,7 +1,9 @@
 return function()
+	local Root = script:FindFirstAncestor("import")
+
 	local getCallingScript = require(script.Parent.getCallingScript)
 
-	local FIXTURE = script.Parent.mocks.callingScriptFallback
+	local FIXTURE = Root.mocks.callingScriptFallback
 
 	it("returns the LuaSourceContainer that called the function", function()
 		local caller = getCallingScript(script)

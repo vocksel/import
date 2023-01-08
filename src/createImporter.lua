@@ -1,6 +1,8 @@
-local t = require(script.Parent.Parent.t)
-local createPathTraverser = require(script.Parent.createPathTraverser)
-local destructure = require(script.Parent.destructure)
+local Root = script:FindFirstAncestor("import")
+
+local t = require(Root.Parent.t)
+local createPathTraverser = require(Root.createPathTraverser)
+local destructure = require(Root.destructure)
 
 type Options = {
 	useWaitForChild: boolean?,

@@ -1,8 +1,10 @@
 return function()
-	local createImporter = require(script.Parent.createImporter)
-	local newFolder = require(script.Parent.newFolder)
+	local Root = script:FindFirstAncestor("import")
 
-	local MOCK_MODULE = script.Parent.mocks.tableModule
+	local newFolder = require(Root.newFolder)
+	local createImporter = require(script.Parent.createImporter)
+
+	local MOCK_MODULE = Root.mocks.tableModule
 
 	it("should error for invalid argument types", function()
 		expect(function()

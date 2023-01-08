@@ -1,7 +1,9 @@
 return function()
+	local Root = script:FindFirstAncestor("import")
+
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-	local newFolder = require(script.Parent.newFolder)
+	local newFolder = require(Root.newFolder)
 	local getInstanceFromFullName = require(script.Parent.getInstanceFromFullName)
 
 	local folder: Folder?

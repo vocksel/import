@@ -1,8 +1,10 @@
-local t = require(script.Parent.t)
-local Llama = require(script.Parent.Llama)
-local createImporter = require(script.createImporter)
-local Options = require(script.Options)
-local getCallingScript = require(script.getCallingScript)
+local Root = script:FindFirstAncestor("import")
+
+local t = require(Root.Parent.t)
+local Llama = require(Root.Parent.Llama)
+local createImporter = require(Root.createImporter)
+local Options = require(Root.Options)
+local getCallingScript = require(Root.getCallingScript)
 
 local config = Options.new(
 	{

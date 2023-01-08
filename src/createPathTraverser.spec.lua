@@ -1,6 +1,8 @@
 return function()
+	local Root = script:FindFirstAncestor("import")
+
+	local newFolder = require(Root.newFolder)
 	local createPathTraverser = require(script.Parent.createPathTraverser)
-	local newFolder = require(script.Parent.newFolder)
 
 	it("should find instances one level up (script.Parent)", function()
 		local start = Instance.new("Script")
