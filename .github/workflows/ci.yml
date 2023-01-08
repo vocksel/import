@@ -25,3 +25,17 @@ jobs:
 
       - name: Format
         run: stylua --check src/
+
+  scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Ensure each script is executable
+        run: |
+          for f in ./bin/*; do
+              if [[ ! -x "$f" ]]; then
+                  echo "Script '$f' is not executable"
+                  exit 1
+              fi
+          done
