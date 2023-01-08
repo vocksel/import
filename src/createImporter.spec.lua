@@ -44,7 +44,7 @@ return function()
 		})
 
 		local aliases = {
-			alias = tree.nest1.nest2.alias,
+			alias = (tree :: any).nest1.nest2.alias,
 		}
 
 		local import = createImporter(tree, start, {

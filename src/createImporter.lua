@@ -23,7 +23,7 @@ local checkInner = t.tuple(t.string, t.optional(t.array(t.string)))
 local function createImporter(root: Instance, start: Instance, options: Options?)
 	assert(checkOuter(root, start, options))
 
-	return function(path: string, exports: { string }?): Instance?
+	return function(path: string, exports: { string }?): (Instance?, ...Instance?)
 		assert(checkInner(path, exports))
 
 		-- This condition is true when the user calls `import("script")`. In
@@ -43,7 +43,9 @@ local function createImporter(root: Instance, start: Instance, options: Options?
 
 		if instance then
 			if instance:IsA("ModuleScript") then
-				local source = require(instance)
+				-- Luau FIXME: Casting to `any` to resolve "TypeError: Unknown
+				-- require: unsupported path"
+				local source = (require :: any)(instance)
 
 				if exports then
 					return destructure(source, exports)

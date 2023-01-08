@@ -105,7 +105,9 @@ return function()
 
 		local traverse = createPathTraverser(game, start)
 
-		expect(traverse("/StarterPlayer/StarterPlayerScripts")).to.equal(StarterPlayer.StarterPlayerScripts)
+		expect(traverse("/StarterPlayer/StarterPlayerScripts")).to.equal(
+			StarterPlayer:FindFirstChild("StarterPlayerScriptsname")
+		)
 	end)
 
 	it("should throw when going past the root", function()
@@ -140,7 +142,7 @@ return function()
 	it("should support aliases", function()
 		local start = Instance.new("Script")
 
-		local tree = newFolder({
+		local tree: any = newFolder({
 			ReplicatedStorage = newFolder({
 				sharedModule = Instance.new("ModuleScript"),
 			}),

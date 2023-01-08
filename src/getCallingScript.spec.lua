@@ -12,6 +12,7 @@ return function()
 
 	it("works on LuaSourceContainers that are unparented", function()
 		local fixture = FIXTURE:Clone()
-		expect(require(fixture.module)).to.equal(true)
+		-- Luau FIXME: Casting to `any` to resolve "TypeError: Unknown require: unsupported path"
+		expect((require :: any)(fixture.module)).to.equal(true)
 	end)
 end
