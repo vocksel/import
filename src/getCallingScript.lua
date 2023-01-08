@@ -22,7 +22,7 @@ local function getCallingScript(module: ModuleScript, useFallback: boolean?): Lu
 			-- call getCallingScript() with the useFallback flag down below.
 			local instance = getInstanceFromFullName(callerPath)
 
-			if instance:IsA("LuaSourceContainer") then
+			if instance and instance:IsA("LuaSourceContainer") then
 				nextCaller = instance
 			end
 		end
