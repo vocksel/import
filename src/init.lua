@@ -1,4 +1,4 @@
-local Root = script:FindFirstAncestor("import")
+local Root = script
 
 local t = require(Root.Parent.t)
 local Llama = require(Root.Parent.Llama)
