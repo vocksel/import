@@ -1,6 +1,8 @@
 return function()
+	local Root = script:FindFirstAncestor("import")
+
+	local t = require(Root.Parent.t)
 	local Options = require(script.Parent.Options)
-	local t = require(script.Parent.Parent.t)
 
 	describe("get", function()
 		it("should return the options object", function()

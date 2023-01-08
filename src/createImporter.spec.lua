@@ -1,20 +1,22 @@
 return function()
-	local createImporter = require(script.Parent.createImporter)
-	local newFolder = require(script.Parent.newFolder)
+	local Root = script:FindFirstAncestor("import")
 
-	local MOCK_MODULE = script.Parent.mocks.tableModule
+	local newFolder = require(Root.newFolder)
+	local createImporter = require(script.Parent.createImporter)
+
+	local MOCK_MODULE = Root.mocks.tableModule
 
 	it("should error for invalid argument types", function()
 		expect(function()
-			createImporter("bad", Instance.new("Folder"))
+			(createImporter :: any)("bad", Instance.new("Folder"))
 		end).to.throw()
 
 		expect(function()
-			createImporter(Instance.new("Folder"), "bad")
+			(createImporter :: any)(Instance.new("Folder"), "bad")
 		end).to.throw()
 
 		expect(function()
-			createImporter()
+			(createImporter :: any)()
 		end).to.throw()
 	end)
 
@@ -42,7 +44,7 @@ return function()
 		})
 
 		local aliases = {
-			alias = tree.nest1.nest2.alias,
+			alias = (tree :: any).nest1.nest2.alias,
 		}
 
 		local import = createImporter(tree, start, {
