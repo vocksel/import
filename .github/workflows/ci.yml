@@ -52,7 +52,7 @@ jobs:
 
       - name: Analyze
         shell: bash
-        run: luau-lsp analyze --sourcemap=sourcemap.json --defs=globalTypes.d.lua --defs=testez.d.lua --formatter=gnu src/
+        run: luau-lsp analyze --sourcemap=sourcemap.json --defs=globalTypes.d.lua --defs=testez.d.lua src/
 
   scripts:
     runs-on: ubuntu-latest
