@@ -8,7 +8,7 @@
 
 local Root = script:FindFirstAncestor("import")
 
-local Llama = require(Root.Parent.Llama)
+local Sift = require(Root.Parent.Sift)
 
 local PATH_SEPERATOR = "."
 
@@ -40,7 +40,7 @@ local function getInstanceFromFullName(fullName: string): Instance?
 				-- Keep around a copy of the `parts` array. We are going to concat this
 				-- into new paths, and incrementally remove from the right to narrow
 				-- down the file path.
-				local tempParts = Llama.List.copy(parts)
+				local tempParts = Sift.Array.copy(parts)
 
 				-- The result of GetFullName() uses dots to separate paths, but we also
 				-- use dots in our file names (e.g. with spec and story files). As such,
@@ -52,11 +52,11 @@ local function getInstanceFromFullName(fullName: string): Instance?
 
 					if found then
 						current = found
-						parts = Llama.List.shift(parts, #name:split(PATH_SEPERATOR))
+						parts = Sift.List.shift(parts, #name:split(PATH_SEPERATOR))
 						break
 					else
 						-- Reduce from the right until we find the next instance
-						tempParts = Llama.List.pop(tempParts)
+						tempParts = Sift.List.pop(tempParts)
 					end
 				end
 			end
